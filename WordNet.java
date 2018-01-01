@@ -1,45 +1,25 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Digraph;
-import edu.princeton.cs.algs4.StdIn;
 
 import java.util.ArrayList;
 
 public class WordNet {
 
-    String[] tempy ;
+
+    private ArrayList<Integer[]> hyponymIntList = new ArrayList<>();
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
 
         In inSynsets = new In(synsets);
+
         In inHypernyms = new In(hypernyms);
-        ArrayList<Integer> hypernymsList = new ArrayList<>();
+        processHypernymsToArrayAndArrayList(inHypernyms);
 
-        String tempString = "";
-        String[] splitArray;
-
-        while (inHypernyms.hasNextLine()) {
-
-            tempString = inHypernyms.readLine();
-            tempy = tempString.split(System.getProperty("line.separator"));
-            int placeHolder = 0;
-
-//          splitArray  = split syntax
-
-        }
-
-        // Extract the first line in the string using tempString.
-        // Split on , in the tempString and then put it into a new array.
-        // Add that to an ArrayList<Array>
-
+        //TODO: Use Hyponyms file to generate Digraph(In in).
     }
 
-    private class Synset {
-
-
-    }
-
-    private void wordTest() {
+    private void hypernymToString() {
 
         // Take the syset id, lookup the id and grab the word from syset.txt.
         // Stick the word in a list that replaces the hyperyms text with words.
@@ -55,6 +35,32 @@ public class WordNet {
         // Although first I need to process the lines from synset and hypernyms files.
         //
 
+    }
+
+    private void processHypernymsToArrayAndArrayList(In inHypernyms) {
+        String hypernymReadLineString = "";
+
+        while (inHypernyms.hasNextLine()) {
+
+            hypernymReadLineString = inHypernyms.readLine();
+            String[] lineString;
+
+            // Splits on new line and inserts it to String[] lineString array.
+            lineString = hypernymReadLineString.split(System.getProperty("line.separator"));
+
+            for (String lineStringStringVar : lineString) {
+                String[] integerLineValues = lineStringStringVar.split(",");
+                Integer[] hypernymArray = new Integer[integerLineValues.length];
+                for (int i = 0; i < integerLineValues.length; i++) {
+
+                    String integerLineValuesVar = integerLineValues[i];
+                    Integer valueOfLineValuesVar = Integer.valueOf(integerLineValuesVar);
+                    hypernymArray[i] = valueOfLineValuesVar;
+
+                }
+                hyponymIntList.add(hypernymArray);
+            }
+        }
     }
 
     // returns all WordNet nouns
@@ -90,7 +96,6 @@ public class WordNet {
     // do unit testing of this class
     public static void main(String[] args) {
         WordNet wordNet = new WordNet("/Users/elsa/learning/Algorithms-Part2/wordnettesting/synsets6.txt", "/Users/elsa/learning/Algorithms-Part2/wordnettesting/hypernyms6TwoAncestors.txt");
-
 
     }
 }
