@@ -1,20 +1,19 @@
 import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.Digraph;
 
 import java.util.ArrayList;
 
 public class WordNet {
 
-
-    private ArrayList<Integer[]> hyponymIntList = new ArrayList<>();
+    private ArrayList<String> synsetWordList = new ArrayList<>();
+    private ArrayList<String> synsetSynonyms = new ArrayList<>();
+    private ArrayList<String> synsetGloss = new ArrayList<>();
+    private ArrayList<Integer[]> hypernymIntList = new ArrayList<>();
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
 
-        In inSynsets = new In(synsets);
-
-        In inHypernyms = new In(hypernyms);
-        processHypernymsToArrayAndArrayList(inHypernyms);
+        processSynsetsToArrayLists(new In(synsets));
+        processHypernymsToArrayList(new In(hypernyms));
 
         //TODO: Use Hyponyms file to generate Digraph(In in).
     }
@@ -32,12 +31,38 @@ public class WordNet {
         // 3. Look up the id's one by one and put them in an arraylist.
         // 4. Print the arraylist to get the translation.
 
-        // Although first I need to process the lines from synset and hypernyms files.
+        // Although first I need to process the lines from synset and hypernyms files. (done!)
         //
+    }
+
+    private void processSynsetsToArrayLists(In inSynsets) {
+        String synsetReadLine;
+
+        while (inSynsets.hasNextLine()) {
+            synsetReadLine = inSynsets.readLine();
+            String[] lineString;
+
+            lineString = synsetReadLine.split(System.getProperty("line.separator"));
+
+            for (String lineSynsetStringVar: lineString) {
+                String[] synsetLineValue = lineSynsetStringVar.split(",");
+
+                // Synset and synonyms are not delimited by a , but by a space. This further
+                // extracts the synset word and synonyms further.
+                String synsetWordAndSynonyms = synsetLineValue[1];
+                String[] synsetAndSynonymSplit = synsetWordAndSynonyms.split(" ", 2);
+                synsetWordList.add(synsetAndSynonymSplit[0]);
+
+                if (synsetAndSynonymSplit.length > 1) {
+                    synsetSynonyms.add(synsetAndSynonymSplit[1]);
+                } else {synsetSynonyms.add("");}
+                synsetGloss.add(synsetLineValue[2]);
+            }
+        }
 
     }
 
-    private void processHypernymsToArrayAndArrayList(In inHypernyms) {
+    private void processHypernymsToArrayList(In inHypernyms) {
         String hypernymReadLineString = "";
 
         while (inHypernyms.hasNextLine()) {
@@ -58,7 +83,7 @@ public class WordNet {
                     hypernymArray[i] = valueOfLineValuesVar;
 
                 }
-                hyponymIntList.add(hypernymArray);
+                hypernymIntList.add(hypernymArray);
             }
         }
     }
@@ -95,7 +120,11 @@ public class WordNet {
 
     // do unit testing of this class
     public static void main(String[] args) {
-        WordNet wordNet = new WordNet("/Users/elsa/learning/Algorithms-Part2/wordnettesting/synsets6.txt", "/Users/elsa/learning/Algorithms-Part2/wordnettesting/hypernyms6TwoAncestors.txt");
+//        WordNet wordNet = new WordNet("/Users/elsa/learning/Algorithms-Part2/wordnettesting/synsets6.txt", "/Users/elsa/learning/Algorithms-Part2/wordnettesting/hypernyms6TwoAncestors.txt");
+//        WordNet wordNet = new WordNet("/Users/elsa/learning/Algorithms-Part2/wordnettesting/synsetsSubSet.txt","/Users/elsa/learning/Algorithms-Part2/wordnettesting/hypernymSubSet.txt");
+        WordNet wordNet = new WordNet("/Users/elsa/learning/Algorithms-Part2/wordnettesting/synsets.txt", "/Users/elsa/learning/Algorithms-Part2/wordnettesting/hypernyms.txt");
+
+
 
     }
 }
