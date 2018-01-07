@@ -16,17 +16,15 @@ public class WordNet {
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
 
+        //TODO: Check isNoun is O(n log n) and test distance
+
         processSynsets(new In(synsets));
         processHypernyms(new In(hypernyms));
 
         BreadthFirstDirectedPaths breadthFirstDirectedPaths = new BreadthFirstDirectedPaths(digraph, 5);
 //        System.out.println(breadthFirstDirectedPaths.hasPathTo(10));
-        Iterable<Integer> iterator1 = breadthFirstDirectedPaths.pathTo(10);
-//        System.out.println(iterator1.iterator());
+        Iterable<Integer> iterator = breadthFirstDirectedPaths.pathTo(10);
 
-
-//        Iterable<Integer> iterator2 = breadthFirstDirectedPaths.pathTo(10);
-//        iterator2.iterator();
 
     }
 
@@ -125,7 +123,13 @@ public class WordNet {
     public boolean isNoun(String word) { // Should be O(logarithmic); ArrayList.contains(word) is O(n)
         // Check if the word is a nouns. the exercise page still mentions
         // "The file synsets.txt lists all the (noun) synsets in WordNet"
-        return synsetNounWordList.contains(word);
+        BreadthFirstDirectedPaths breadthFirstDirectedPathsDigraph =
+                new BreadthFirstDirectedPaths(
+                        digraph,
+                        breadthFirstDirectedPaths.pathTo(synsetNounWordList.indexOf(word)));
+
+        return breadthFirstDirectedPathsDigraph.hasPathTo(synsetNounWordList.indexOf(word)); // < -- Is this really O(log n)?
+         // Originally put in synsetNounWordList.contains(word); but that is O(n)
     }
 
     // distance between nounA and nounB (defined below)
@@ -136,9 +140,9 @@ public class WordNet {
         this.breadthFirstDirectedPaths = new BreadthFirstDirectedPaths(digraph, synsetNounWordList.indexOf(nounA));
         if (breadthFirstDirectedPaths.hasPathTo(synsetNounWordList.indexOf(nounB))) {
 //        if (breadthFirstDirectedPaths.hasPathTo(0)) {
-            Iterable<Integer> iterator = breadthFirstDirectedPaths.pathTo(0);
-            size++;
-            if (iterator.iterator().hasNext()) {
+            Iterable<Integer> iterator = breadthFirstDirectedPaths.pathTo(synsetNounWordList.indexOf(nounB));
+            while (iterator.iterator().hasNext()) {
+                size++;
             }
         } else {
             return 0;
