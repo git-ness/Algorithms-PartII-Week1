@@ -1,8 +1,12 @@
 import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Stack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class WordNet {
 
@@ -11,7 +15,8 @@ public class WordNet {
     private ArrayList<String> synsetGloss = new ArrayList<>();
     private ArrayList<Integer[]> hypernymIntList = new ArrayList<>();
     private Digraph digraph;
-    private BreadthFirstDirectedPaths breadthFirstDirectedPaths;
+    private BreadthFirstDirectedPaths breadthFirstDirectedPathsAll;
+    private BreadthFirstDirectedPaths breadthFirstDirectedPathsDistance;
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
@@ -22,7 +27,7 @@ public class WordNet {
         processHypernyms(new In(hypernyms));
 
         BreadthFirstDirectedPaths breadthFirstDirectedPaths = new BreadthFirstDirectedPaths(digraph, 5);
-//        System.out.println(breadthFirstDirectedPaths.hasPathTo(10));
+//        System.out.println(breadthFirstDirectedPathsDistance.hasPathTo(10));
         Iterable<Integer> iterator = breadthFirstDirectedPaths.pathTo(10);
 
 
@@ -108,6 +113,7 @@ public class WordNet {
 
             }
         }
+        this.breadthFirstDirectedPathsAll = new BreadthFirstDirectedPaths(digraph, 0 );
     }
 
 
@@ -123,26 +129,35 @@ public class WordNet {
     public boolean isNoun(String word) { // Should be O(logarithmic); ArrayList.contains(word) is O(n)
         // Check if the word is a nouns. the exercise page still mentions
         // "The file synsets.txt lists all the (noun) synsets in WordNet"
+
+
+
+
+        /**
+         * Thought that I could maybe use BFD as it has a queue but then realized BFS is O(E) i.e. O(n).
         BreadthFirstDirectedPaths breadthFirstDirectedPathsDigraph =
                 new BreadthFirstDirectedPaths(
                         digraph,
-                        breadthFirstDirectedPaths.pathTo(synsetNounWordList.indexOf(word)));
+                        breadthFirstDirectedPathsAll.pathTo(synsetNounWordList.indexOf(word)));
 
         return breadthFirstDirectedPathsDigraph.hasPathTo(synsetNounWordList.indexOf(word)); // < -- Is this really O(log n)?
+
+        */
          // Originally put in synsetNounWordList.contains(word); but that is O(n)
-    }
+    return false;}
 
     // distance between nounA and nounB (defined below)
     public int distance(String nounA, String nounB) {
         // distance(A, B) = distance is the minimum length of any ancestral path between any synset v of A and any synset w of B.
-//        this.breadthFirstDirectedPaths = new BreadthFirstDirectedPaths(digraph, 5);
-        int size = 1;
-        this.breadthFirstDirectedPaths = new BreadthFirstDirectedPaths(digraph, synsetNounWordList.indexOf(nounA));
-        if (breadthFirstDirectedPaths.hasPathTo(synsetNounWordList.indexOf(nounB))) {
-//        if (breadthFirstDirectedPaths.hasPathTo(0)) {
-            Iterable<Integer> iterator = breadthFirstDirectedPaths.pathTo(synsetNounWordList.indexOf(nounB));
+//        this.breadthFirstDirectedPathsDistance = new BreadthFirstDirectedPaths(digraph, 5);
+        int size = -1; // Need to start from -1 because if size at 0, size is counting the vertex.
+        this.breadthFirstDirectedPathsDistance = new BreadthFirstDirectedPaths(digraph, synsetNounWordList.indexOf(nounA));
+        if (breadthFirstDirectedPathsDistance.hasPathTo(synsetNounWordList.indexOf(nounB))) {
+//        if (breadthFirstDirectedPathsDistance.hasPathTo(0)) {
+            Iterable<Integer> iterator = breadthFirstDirectedPathsDistance.pathTo(synsetNounWordList.indexOf(nounB));
             while (iterator.iterator().hasNext()) {
                 size++;
+                ((Stack) iterator).pop();
             }
         } else {
             return 0;
@@ -161,8 +176,10 @@ public class WordNet {
     public static void main(String[] args) {
 //        WordNet wordNet = new WordNet("wordnettesting/synsets6.txt", "wordnettesting/hypernyms6TwoAncestors.txt");
 //        WordNet wordNet = new WordNet("wordnettesting/synsetsSubSet.txt","wordnettesting/hypernymSubSet.txt");
-        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernymsManyPathsOneAncestor.txt");
-        System.out.println("Should be 2: " + wordNet.distance("noun1", "noun2"));
+        WordNet wordNet = new WordNet("wordnettesting/synsets15.txt", "wordnettesting/hypernyms15Path.txt");
+//        System.out.println("Should be 2: " + wordNet.distance("noun1", "noun2"));
+//        System.out.println("Distance from e to a is four: " + wordNet.distance("e", "a"));
+        System.out.println(wordNet.isNoun("b"));
 
     }
 }
