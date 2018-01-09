@@ -4,7 +4,8 @@
 
 // Use all nouns as a key and have the value be the integer.
 // If there is more than one noun, store multiple keys as an array.
-// noun -> key1, key2, key3 --> if there is a <K, V> at all...return true
+// noun -> key1, key2, key3 (noun, idKey if more than one) --> if there is a <K, V> at all...return true
+// Also create David's idea for more than one.
 
 import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
@@ -12,14 +13,12 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Stack;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.TreeSet;
 
 public class WordNet {
 
     private ArrayList<String> synsetNounWordArrayList = new ArrayList<>();
-    //    private TreeSetComparator treeSetComparator = new TreeSetComparator();
     private TreeSet<String> synsetNounWordTreeSet = new TreeSet<>();
     private ArrayList<String> synsetSynonyms = new ArrayList<>();
     private ArrayList<String> synsetGloss = new ArrayList<>();
@@ -61,15 +60,12 @@ public class WordNet {
         //
     }
 
-
     private void processSynsets(In inSynsets) {
 
         String synsetReadLine;
 
         while (inSynsets.hasNextLine()) {
             synsetReadLine = inSynsets.readLine();
-
-
             String[] lineString = synsetReadLine.split(System.getProperty("line.separator"));
 
             for (String lineSynsetStringVar : lineString) {
@@ -82,21 +78,32 @@ public class WordNet {
                 synsetNounWordArrayList.add(synsetAndSynonymSplit[0]);
                 synsetNounWordTreeSet.add(synsetAndSynonymSplit[0]);
 
+                if (synsetHashMap.containsKey(synsetAndSynonymSplit[0])) { // synsetHashMap ("e", [4]) and is true
+                    // remove value, collect the id of the value and aggregate existing id's and add the new one into an array.
+
+                    Integer[] synsetHashValue = (Integer[]) synsetHashMap.get(synsetAndSynonymSplit[0]); // Value of [7] (returned) has key "h"
+                    Integer[] newInt = new Integer[synsetHashValue.length + 1];
+                    for (int i = 0; i < synsetHashValue.length; i++) {
+                        newInt[i] = synsetHashValue[i];
+                    }
+                    newInt[newInt.length -1] = Integer.valueOf(synsetLineValue[0]);
+                    synsetHashMap.put(synsetAndSynonymSplit[0], newInt);
+                } else {
+                    String s = synsetLineValue[0];
+                    Integer[] matchingNounIndexArray = new Integer[1];
+                    matchingNounIndexArray[0] = Integer.parseInt(s);
+                    synsetHashMap.put(synsetAndSynonymSplit[0], matchingNounIndexArray);
+                }
+
                 if (synsetAndSynonymSplit.length > 1) {
                     synsetSynonyms.add(synsetAndSynonymSplit[1]);
-                    synsetHashMap.put(synsetLineValue[0], synsetAndSynonymSplit[1]);
+//                    synsetHashMap.put(synsetLineValue[0], synsetAndSynonymSplit[1]);
                 } else {
                     synsetSynonyms.add("");
                 }
-
                 synsetGloss.add(synsetLineValue[2]);
             }
         }
-        String placeHolder = "";
-    }
-
-    public int test() {
-        return synsetNounWordTreeSet.headSet("f").size();
     }
 
     private void processHypernyms(In inHypernyms) {
@@ -145,9 +152,8 @@ public class WordNet {
     // is the word a WordNet noun?
     public boolean isNoun(String word) {
 
-
-    return false;}
-
+        return synsetHashMap.containsKey(word);
+    }
 
     // distance between nounA and nounB (defined below)
     public int distance(String nounA, String nounB) {
@@ -180,26 +186,10 @@ public class WordNet {
 //        WordNet wordNet = new WordNet("wordnettesting/synsets6.txt", "wordnettesting/hypernyms6TwoAncestors.txt");
 //        WordNet wordNet = new WordNet("wordnettesting/synsetsSubSet.txt","wordnettesting/hypernymSubSet.txt");
 //        WordNet wordNet = new WordNet("wordnettesting/synsets15.txt", "wordnettesting/hypernyms15Path.txt");
-        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms.txt");
+        WordNet wordNet = new WordNet("wordnettesting/synsets15.txt", "wordnettesting/hypernyms.txt");
 
 
     }
-
-//    private class TreeSetComparator implements Comparator<String> {
-//
-//        @Override
-//        public int compare(String o1, String o2) {
-//
-//            // Source: http://www.java2novice.com/java-collections-and-util/treeset/with-comparator/
-////            return o1.compareTo(o2);
-//
-//            if (synsetNounWordTreeSet.contains(o1)|synsetNounWordTreeSet.contains(o2)) {
-//                return 1; // I imagine that if greater, it will add the end of the TreeSet
-//            }
-//            else {return synsetNounWordTreeSet.comparator().compare(o1, o2); }
-//
-//        }
-//    }
 }
 
 
