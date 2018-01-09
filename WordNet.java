@@ -1,28 +1,43 @@
+
+
+// Implementing that stores both the id and the set of synonyms. What data structure what would that be.
+
+// Use all nouns as a key and have the value be the integer.
+// If there is more than one noun, store multiple keys as an array.
+// noun -> key1, key2, key3 (noun, idKey if more than one) --> if there is a <K, V> at all...return true
+// Also create David's idea for more than one.
+
 import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Stack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeSet;
 
 public class WordNet {
 
-    private ArrayList<String> synsetNounWordList = new ArrayList<>();
+    private ArrayList<String> synsetNounWordArrayList = new ArrayList<>();
+    private TreeSet<String> synsetNounWordTreeSet = new TreeSet<>();
     private ArrayList<String> synsetSynonyms = new ArrayList<>();
     private ArrayList<String> synsetGloss = new ArrayList<>();
     private ArrayList<Integer[]> hypernymIntList = new ArrayList<>();
     private Digraph digraph;
-    private BreadthFirstDirectedPaths breadthFirstDirectedPaths;
+    private BreadthFirstDirectedPaths breadthFirstDirectedPathsAll;
+    private BreadthFirstDirectedPaths breadthFirstDirectedPathsDistance;
+    private HashMap synsetHashMap = new HashMap();
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
 
-        //TODO: Check isNoun is O(n log n) and test distance
+        //TODO: Check isNoun is O(log n) and test distance
 
         processSynsets(new In(synsets));
         processHypernyms(new In(hypernyms));
 
         BreadthFirstDirectedPaths breadthFirstDirectedPaths = new BreadthFirstDirectedPaths(digraph, 5);
-//        System.out.println(breadthFirstDirectedPaths.hasPathTo(10));
+//        System.out.println(breadthFirstDirectedPathsDistance.hasPathTo(10));
         Iterable<Integer> iterator = breadthFirstDirectedPaths.pathTo(10);
 
 
@@ -45,15 +60,12 @@ public class WordNet {
         //
     }
 
-
     private void processSynsets(In inSynsets) {
 
         String synsetReadLine;
 
         while (inSynsets.hasNextLine()) {
             synsetReadLine = inSynsets.readLine();
-
-
             String[] lineString = synsetReadLine.split(System.getProperty("line.separator"));
 
             for (String lineSynsetStringVar : lineString) {
@@ -63,14 +75,32 @@ public class WordNet {
                 // extracts the synset word and synonyms further.
                 String synsetWordAndSynonyms = synsetLineValue[1];
                 String[] synsetAndSynonymSplit = synsetWordAndSynonyms.split(" ", 2);
-                synsetNounWordList.add(synsetAndSynonymSplit[0]);
+                synsetNounWordArrayList.add(synsetAndSynonymSplit[0]);
+                synsetNounWordTreeSet.add(synsetAndSynonymSplit[0]);
+
+                if (synsetHashMap.containsKey(synsetAndSynonymSplit[0])) { // synsetHashMap ("e", [4]) and is true
+                    // remove value, collect the id of the value and aggregate existing id's and add the new one into an array.
+
+                    Integer[] synsetHashValue = (Integer[]) synsetHashMap.get(synsetAndSynonymSplit[0]); // Value of [7] (returned) has key "h"
+                    Integer[] newInt = new Integer[synsetHashValue.length + 1];
+                    for (int i = 0; i < synsetHashValue.length; i++) {
+                        newInt[i] = synsetHashValue[i];
+                    }
+                    newInt[newInt.length -1] = Integer.valueOf(synsetLineValue[0]);
+                    synsetHashMap.put(synsetAndSynonymSplit[0], newInt);
+                } else {
+                    String s = synsetLineValue[0];
+                    Integer[] matchingNounIndexArray = new Integer[1];
+                    matchingNounIndexArray[0] = Integer.parseInt(s);
+                    synsetHashMap.put(synsetAndSynonymSplit[0], matchingNounIndexArray);
+                }
 
                 if (synsetAndSynonymSplit.length > 1) {
                     synsetSynonyms.add(synsetAndSynonymSplit[1]);
+//                    synsetHashMap.put(synsetLineValue[0], synsetAndSynonymSplit[1]);
                 } else {
                     synsetSynonyms.add("");
                 }
-
                 synsetGloss.add(synsetLineValue[2]);
             }
         }
@@ -108,41 +138,35 @@ public class WordNet {
 
             }
         }
+        this.breadthFirstDirectedPathsAll = new BreadthFirstDirectedPaths(digraph, 0);
     }
-
 
     // returns all WordNet nouns
     public Iterable<String> nouns() {
         // Process out all the nouns from the given files. Aren't they already all nouns though? From
         // the exercise page, "The file synsets.txt lists all the (noun) synsets in WordNet"
         // Guess it just wants a list of them that's iterable.
-        return synsetNounWordList;
+        return synsetNounWordArrayList;
     }
 
     // is the word a WordNet noun?
-    public boolean isNoun(String word) { // Should be O(logarithmic); ArrayList.contains(word) is O(n)
-        // Check if the word is a nouns. the exercise page still mentions
-        // "The file synsets.txt lists all the (noun) synsets in WordNet"
-        BreadthFirstDirectedPaths breadthFirstDirectedPathsDigraph =
-                new BreadthFirstDirectedPaths(
-                        digraph,
-                        breadthFirstDirectedPaths.pathTo(synsetNounWordList.indexOf(word)));
+    public boolean isNoun(String word) {
 
-        return breadthFirstDirectedPathsDigraph.hasPathTo(synsetNounWordList.indexOf(word)); // < -- Is this really O(log n)?
-         // Originally put in synsetNounWordList.contains(word); but that is O(n)
+        return synsetHashMap.containsKey(word);
     }
 
     // distance between nounA and nounB (defined below)
     public int distance(String nounA, String nounB) {
         // distance(A, B) = distance is the minimum length of any ancestral path between any synset v of A and any synset w of B.
-//        this.breadthFirstDirectedPaths = new BreadthFirstDirectedPaths(digraph, 5);
-        int size = 1;
-        this.breadthFirstDirectedPaths = new BreadthFirstDirectedPaths(digraph, synsetNounWordList.indexOf(nounA));
-        if (breadthFirstDirectedPaths.hasPathTo(synsetNounWordList.indexOf(nounB))) {
-//        if (breadthFirstDirectedPaths.hasPathTo(0)) {
-            Iterable<Integer> iterator = breadthFirstDirectedPaths.pathTo(synsetNounWordList.indexOf(nounB));
+//        this.breadthFirstDirectedPathsDistance = new BreadthFirstDirectedPaths(digraph, 5);
+        int size = -1; // Need to start from -1 because if size at 0, size is counting the vertex.
+        this.breadthFirstDirectedPathsDistance = new BreadthFirstDirectedPaths(digraph, synsetNounWordArrayList.indexOf(nounA));
+        if (breadthFirstDirectedPathsDistance.hasPathTo(synsetNounWordArrayList.indexOf(nounB))) {
+//        if (breadthFirstDirectedPathsDistance.hasPathTo(0)) {
+            Iterable<Integer> iterator = breadthFirstDirectedPathsDistance.pathTo(synsetNounWordArrayList.indexOf(nounB));
             while (iterator.iterator().hasNext()) {
                 size++;
+                ((Stack) iterator).pop();
             }
         } else {
             return 0;
@@ -161,8 +185,11 @@ public class WordNet {
     public static void main(String[] args) {
 //        WordNet wordNet = new WordNet("wordnettesting/synsets6.txt", "wordnettesting/hypernyms6TwoAncestors.txt");
 //        WordNet wordNet = new WordNet("wordnettesting/synsetsSubSet.txt","wordnettesting/hypernymSubSet.txt");
-        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernymsManyPathsOneAncestor.txt");
-        System.out.println("Should be 2: " + wordNet.distance("noun1", "noun2"));
+//        WordNet wordNet = new WordNet("wordnettesting/synsets15.txt", "wordnettesting/hypernyms15Path.txt");
+        WordNet wordNet = new WordNet("wordnettesting/synsets15.txt", "wordnettesting/hypernyms.txt");
+
 
     }
 }
+
+
