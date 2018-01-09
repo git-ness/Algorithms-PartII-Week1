@@ -1,27 +1,38 @@
+
+
+// Implementing that stores both the id and the set of synonyms. What data structure what would that be.
+
+// Use all nouns as a key and have the value be the integer.
+// If there is more than one noun, store multiple keys as an array.
+// noun -> key1, key2, key3 --> if there is a <K, V> at all...return true
+
 import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Stack;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.TreeMap;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.TreeSet;
 
 public class WordNet {
 
-    private ArrayList<String> synsetNounWordList = new ArrayList<>();
+    private ArrayList<String> synsetNounWordArrayList = new ArrayList<>();
+    //    private TreeSetComparator treeSetComparator = new TreeSetComparator();
+    private TreeSet<String> synsetNounWordTreeSet = new TreeSet<>();
     private ArrayList<String> synsetSynonyms = new ArrayList<>();
     private ArrayList<String> synsetGloss = new ArrayList<>();
     private ArrayList<Integer[]> hypernymIntList = new ArrayList<>();
     private Digraph digraph;
     private BreadthFirstDirectedPaths breadthFirstDirectedPathsAll;
     private BreadthFirstDirectedPaths breadthFirstDirectedPathsDistance;
+    private HashMap synsetHashMap = new HashMap();
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
 
-        //TODO: Check isNoun is O(n log n) and test distance
+        //TODO: Check isNoun is O(log n) and test distance
 
         processSynsets(new In(synsets));
         processHypernyms(new In(hypernyms));
@@ -68,10 +79,12 @@ public class WordNet {
                 // extracts the synset word and synonyms further.
                 String synsetWordAndSynonyms = synsetLineValue[1];
                 String[] synsetAndSynonymSplit = synsetWordAndSynonyms.split(" ", 2);
-                synsetNounWordList.add(synsetAndSynonymSplit[0]);
+                synsetNounWordArrayList.add(synsetAndSynonymSplit[0]);
+                synsetNounWordTreeSet.add(synsetAndSynonymSplit[0]);
 
                 if (synsetAndSynonymSplit.length > 1) {
                     synsetSynonyms.add(synsetAndSynonymSplit[1]);
+                    synsetHashMap.put(synsetLineValue[0], synsetAndSynonymSplit[1]);
                 } else {
                     synsetSynonyms.add("");
                 }
@@ -79,6 +92,11 @@ public class WordNet {
                 synsetGloss.add(synsetLineValue[2]);
             }
         }
+        String placeHolder = "";
+    }
+
+    public int test() {
+        return synsetNounWordTreeSet.headSet("f").size();
     }
 
     private void processHypernyms(In inHypernyms) {
@@ -113,48 +131,33 @@ public class WordNet {
 
             }
         }
-        this.breadthFirstDirectedPathsAll = new BreadthFirstDirectedPaths(digraph, 0 );
+        this.breadthFirstDirectedPathsAll = new BreadthFirstDirectedPaths(digraph, 0);
     }
-
 
     // returns all WordNet nouns
     public Iterable<String> nouns() {
         // Process out all the nouns from the given files. Aren't they already all nouns though? From
         // the exercise page, "The file synsets.txt lists all the (noun) synsets in WordNet"
         // Guess it just wants a list of them that's iterable.
-        return synsetNounWordList;
+        return synsetNounWordArrayList;
     }
 
     // is the word a WordNet noun?
-    public boolean isNoun(String word) { // Should be O(logarithmic); ArrayList.contains(word) is O(n)
-        // Check if the word is a nouns. the exercise page still mentions
-        // "The file synsets.txt lists all the (noun) synsets in WordNet"
+    public boolean isNoun(String word) {
 
 
-
-
-        /**
-         * Thought that I could maybe use BFD as it has a queue but then realized BFS is O(E) i.e. O(n).
-        BreadthFirstDirectedPaths breadthFirstDirectedPathsDigraph =
-                new BreadthFirstDirectedPaths(
-                        digraph,
-                        breadthFirstDirectedPathsAll.pathTo(synsetNounWordList.indexOf(word)));
-
-        return breadthFirstDirectedPathsDigraph.hasPathTo(synsetNounWordList.indexOf(word)); // < -- Is this really O(log n)?
-
-        */
-         // Originally put in synsetNounWordList.contains(word); but that is O(n)
     return false;}
+
 
     // distance between nounA and nounB (defined below)
     public int distance(String nounA, String nounB) {
         // distance(A, B) = distance is the minimum length of any ancestral path between any synset v of A and any synset w of B.
 //        this.breadthFirstDirectedPathsDistance = new BreadthFirstDirectedPaths(digraph, 5);
         int size = -1; // Need to start from -1 because if size at 0, size is counting the vertex.
-        this.breadthFirstDirectedPathsDistance = new BreadthFirstDirectedPaths(digraph, synsetNounWordList.indexOf(nounA));
-        if (breadthFirstDirectedPathsDistance.hasPathTo(synsetNounWordList.indexOf(nounB))) {
+        this.breadthFirstDirectedPathsDistance = new BreadthFirstDirectedPaths(digraph, synsetNounWordArrayList.indexOf(nounA));
+        if (breadthFirstDirectedPathsDistance.hasPathTo(synsetNounWordArrayList.indexOf(nounB))) {
 //        if (breadthFirstDirectedPathsDistance.hasPathTo(0)) {
-            Iterable<Integer> iterator = breadthFirstDirectedPathsDistance.pathTo(synsetNounWordList.indexOf(nounB));
+            Iterable<Integer> iterator = breadthFirstDirectedPathsDistance.pathTo(synsetNounWordArrayList.indexOf(nounB));
             while (iterator.iterator().hasNext()) {
                 size++;
                 ((Stack) iterator).pop();
@@ -176,10 +179,27 @@ public class WordNet {
     public static void main(String[] args) {
 //        WordNet wordNet = new WordNet("wordnettesting/synsets6.txt", "wordnettesting/hypernyms6TwoAncestors.txt");
 //        WordNet wordNet = new WordNet("wordnettesting/synsetsSubSet.txt","wordnettesting/hypernymSubSet.txt");
-        WordNet wordNet = new WordNet("wordnettesting/synsets15.txt", "wordnettesting/hypernyms15Path.txt");
-//        System.out.println("Should be 2: " + wordNet.distance("noun1", "noun2"));
-//        System.out.println("Distance from e to a is four: " + wordNet.distance("e", "a"));
-        System.out.println(wordNet.isNoun("b"));
+//        WordNet wordNet = new WordNet("wordnettesting/synsets15.txt", "wordnettesting/hypernyms15Path.txt");
+        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms.txt");
+
 
     }
+
+//    private class TreeSetComparator implements Comparator<String> {
+//
+//        @Override
+//        public int compare(String o1, String o2) {
+//
+//            // Source: http://www.java2novice.com/java-collections-and-util/treeset/with-comparator/
+////            return o1.compareTo(o2);
+//
+//            if (synsetNounWordTreeSet.contains(o1)|synsetNounWordTreeSet.contains(o2)) {
+//                return 1; // I imagine that if greater, it will add the end of the TreeSet
+//            }
+//            else {return synsetNounWordTreeSet.comparator().compare(o1, o2); }
+//
+//        }
+//    }
 }
+
+
