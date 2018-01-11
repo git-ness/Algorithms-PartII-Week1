@@ -1,32 +1,32 @@
-
-
 // Implementing that stores both the id and the set of synonyms. What data structure what would that be.
 
 // Use all nouns as a key and have the value be the integer.
 // If there is more than one noun, store multiple keys as an array.
 // noun -> key1, key2, key3 (noun, idKey if more than one) --> if there is a <K, V> at all...return true
-// Also create David's idea for more than one.
 
 import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Stack;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
 
+
 public class WordNet {
 
     private ArrayList<String> synsetNounWordArrayList = new ArrayList<>();
-    private TreeSet<String> synsetNounWordTreeSet = new TreeSet<>();
+    private HashMap<String, ArrayList<Integer>> synsetHashMap = new HashMap<>();
     private ArrayList<String> synsetSynonyms = new ArrayList<>();
     private ArrayList<String> synsetGloss = new ArrayList<>();
-    private ArrayList<Integer[]> hypernymIntList = new ArrayList<>();
+    private ArrayList<ArrayList<Integer>> hypernymIntList = new ArrayList<>();
     private Digraph digraph;
     private BreadthFirstDirectedPaths breadthFirstDirectedPathsAll;
     private BreadthFirstDirectedPaths breadthFirstDirectedPathsDistance;
-    private HashMap synsetHashMap = new HashMap();
+    private SAP sap;
+
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
@@ -35,29 +35,6 @@ public class WordNet {
 
         processSynsets(new In(synsets));
         processHypernyms(new In(hypernyms));
-
-        BreadthFirstDirectedPaths breadthFirstDirectedPaths = new BreadthFirstDirectedPaths(digraph, 5);
-//        System.out.println(breadthFirstDirectedPathsDistance.hasPathTo(10));
-        Iterable<Integer> iterator = breadthFirstDirectedPaths.pathTo(10);
-
-
-    }
-
-    private void hypernymToString() {
-
-        // Take the syset id, lookup the id and grab the word from syset.txt.
-        // Stick the word in a list that replaces the hyperyms text with words.
-        // So I guess just find a way to look up the id's in syset.txt and translate
-        // them to the word, then stick them in another list.
-
-        // Although we need to grab the hypernyms list first.
-        // 1. Input the id you want.
-        // 2. It will find the id and grab the whole line in hypernyms txt
-        // 3. Look up the id's one by one and put them in an arraylist.
-        // 4. Print the arraylist to get the translation.
-
-        // Although first I need to process the lines from synset and hypernyms files. (done!)
-        //
     }
 
     private void processSynsets(In inSynsets) {
@@ -76,17 +53,16 @@ public class WordNet {
                 String synsetWordAndSynonyms = synsetLineValue[1];
                 String[] synsetAndSynonymSplit = synsetWordAndSynonyms.split(" ", 2);
                 synsetNounWordArrayList.add(synsetAndSynonymSplit[0]);
-                synsetNounWordTreeSet.add(synsetAndSynonymSplit[0]);
 
                 if (synsetHashMap.containsKey(synsetAndSynonymSplit[0])) { // synsetHashMap ("e", [4]) and is true
-                    // remove value, collect the id of the value and aggregate existing id's and add the new one into an array.
+                    // After extracting current id's, collect the id of the value and aggregate existing id's, add the new id into an array.
 
-                    Integer[] synsetHashValue = (Integer[]) synsetHashMap.get(synsetAndSynonymSplit[0]); // Value of [7] (returned) has key "h"
+                    Integer[] synsetHashValue = (Integer[]) synsetHashMap.get(synsetAndSynonymSplit[0]);
                     Integer[] newInt = new Integer[synsetHashValue.length + 1];
                     for (int i = 0; i < synsetHashValue.length; i++) {
                         newInt[i] = synsetHashValue[i];
                     }
-                    newInt[newInt.length -1] = Integer.valueOf(synsetLineValue[0]);
+                    newInt[newInt.length - 1] = Integer.valueOf(synsetLineValue[0]);
                     synsetHashMap.put(synsetAndSynonymSplit[0], newInt);
                 } else {
                     String s = synsetLineValue[0];
@@ -119,26 +95,24 @@ public class WordNet {
 
             for (String lineStringStringVar : lineString) {
                 String[] integerLineValues = lineStringStringVar.split(",");
-                Integer[] hypernymArray = new Integer[integerLineValues.length];
+                ArrayList<Integer> hypernymArray = new ArrayList<>();
+
                 for (int i = 0; i < integerLineValues.length; i++) {
-                    verticesCount++;
-                    String integerLineValuesVar = integerLineValues[i];
-                    Integer valueOfLineValuesVar = Integer.valueOf(integerLineValuesVar);
-                    hypernymArray[i] = valueOfLineValuesVar;
+                    hypernymArray.add(i);
                 }
+
                 hypernymIntList.add(hypernymArray);
             }
         }
         digraph = new Digraph(verticesCount);
 
-        for (Integer[] intList : hypernymIntList) {
-            for (int i = 1; i < intList.length; i++) {
+        for (ArrayList<Integer> intList : hypernymIntList) {
+            for (int i = 1; i < intList.size(); i++) {
 //              System.out.println("i: " + i + " intList[intList.length - i]: " + intList[intList.length - i] + " intList[intList.length - i - 1]: " + intList[intList.length - i - 1]);
-                digraph.addEdge(intList[intList.length - i], intList[intList.length - i - 1]);
-
+                digraph.addEdge(intList.get(i), intList.get(i - 1));
             }
         }
-        this.breadthFirstDirectedPathsAll = new BreadthFirstDirectedPaths(digraph, 0);
+        this.sap = new SAP(digraph);
     }
 
     // returns all WordNet nouns
@@ -159,19 +133,8 @@ public class WordNet {
     public int distance(String nounA, String nounB) {
         // distance(A, B) = distance is the minimum length of any ancestral path between any synset v of A and any synset w of B.
 //        this.breadthFirstDirectedPathsDistance = new BreadthFirstDirectedPaths(digraph, 5);
-        int size = -1; // Need to start from -1 because if size at 0, size is counting the vertex.
-        this.breadthFirstDirectedPathsDistance = new BreadthFirstDirectedPaths(digraph, synsetNounWordArrayList.indexOf(nounA));
-        if (breadthFirstDirectedPathsDistance.hasPathTo(synsetNounWordArrayList.indexOf(nounB))) {
-//        if (breadthFirstDirectedPathsDistance.hasPathTo(0)) {
-            Iterable<Integer> iterator = breadthFirstDirectedPathsDistance.pathTo(synsetNounWordArrayList.indexOf(nounB));
-            while (iterator.iterator().hasNext()) {
-                size++;
-                ((Stack) iterator).pop();
-            }
-        } else {
-            return 0;
-        }
-        return size;
+
+        return sap.length(synsetHashMap.get(nounA), synsetHashMap.get(nounB));
     }
 
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
@@ -186,8 +149,8 @@ public class WordNet {
 //        WordNet wordNet = new WordNet("wordnettesting/synsets6.txt", "wordnettesting/hypernyms6TwoAncestors.txt");
 //        WordNet wordNet = new WordNet("wordnettesting/synsetsSubSet.txt","wordnettesting/hypernymSubSet.txt");
 //        WordNet wordNet = new WordNet("wordnettesting/synsets15.txt", "wordnettesting/hypernyms15Path.txt");
-        WordNet wordNet = new WordNet("wordnettesting/synsets15.txt", "wordnettesting/hypernyms.txt");
-
+        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms.txt");
+        System.out.println("Is n present? Yes: " + wordNet.isNoun("claw"));
 
     }
 }
