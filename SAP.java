@@ -17,28 +17,27 @@ public class SAP {
 
     private LengthAndAncestor ancestorLength(Iterable<Integer> v, Iterable<Integer> w) {
 
-//        BreadthFirstDirectedPaths bfsV = new BreadthFirstDirectedPaths(digraph, v);
-//        BreadthFirstDirectedPaths bfsW = new BreadthFirstDirectedPaths(digraph, w);
-//
-//        int shortestDistanceCandidate = Integer.MAX_VALUE;
-//        int bestAncestor = 0;
-//        for (int anc = 0; anc < digraph.V(); anc++) {
-//            if (bfsV.hasPathTo(anc) && bfsW.hasPathTo(anc)) {
-//
-//                int checkForNewCandidate = bfsV.distTo(anc) + bfsW.distTo(anc);
-//                if (checkForNewCandidate < shortestDistanceCandidate) {
-//                    shortestDistanceCandidate = checkForNewCandidate;
-//                    bestAncestor = anc;
-//                }
-//            }
-//        }
-//        if (shortestDistanceCandidate == Integer.MAX_VALUE) {
-//            return new LengthAndAncestor(-1, -1);
-//        }
-//
-//        return new LengthAndAncestor(bestAncestor, shortestDistanceCandidate);
+        BreadthFirstDirectedPaths bfsV = new BreadthFirstDirectedPaths(digraph, v);
+        BreadthFirstDirectedPaths bfsW = new BreadthFirstDirectedPaths(digraph, w);
 
-    return null;}
+        int shortestDistanceCandidate = Integer.MAX_VALUE;
+        int bestAncestor = 0;
+        for (int anc = 0; anc < digraph.V(); anc++) {
+            if (bfsV.hasPathTo(anc) && bfsW.hasPathTo(anc)) {
+
+                int checkForNewCandidate = bfsV.distTo(anc) + bfsW.distTo(anc);
+                if (checkForNewCandidate < shortestDistanceCandidate) {
+                    shortestDistanceCandidate = checkForNewCandidate;
+                    bestAncestor = anc;
+                }
+            }
+        }
+        if (shortestDistanceCandidate == Integer.MAX_VALUE) {
+            return new LengthAndAncestor(-1, -1);
+        }
+
+        return new LengthAndAncestor(bestAncestor, shortestDistanceCandidate);
+    }
 
     private class LengthAndAncestor {
 
@@ -99,17 +98,15 @@ public class SAP {
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
-        return 0;
+
+        return ancestor(v, w);
     }
 
     // do unit testing of this class
     public static void main(String[] args) {
-        In in = new In("wordnettesting/moreC");
+        In in = new In("wordnettesting/digraph-wordnet.txt");
         Digraph digraph = new Digraph(in);
         SAP sap = new SAP(digraph);
-        System.out.println("getAncestorVertex 0?: " + sap.ancestor(1, 4));
-        System.out.println("get length: 3? " + sap.length(1, 4));
-
-
+        
     }
 }

@@ -57,18 +57,20 @@ public class WordNet {
                 if (synsetHashMap.containsKey(synsetAndSynonymSplit[0])) { // synsetHashMap ("e", [4]) and is true
                     // After extracting current id's, collect the id of the value and aggregate existing id's, add the new id into an array.
 
-                    Integer[] synsetHashValue = (Integer[]) synsetHashMap.get(synsetAndSynonymSplit[0]);
-                    Integer[] newInt = new Integer[synsetHashValue.length + 1];
-                    for (int i = 0; i < synsetHashValue.length; i++) {
-                        newInt[i] = synsetHashValue[i];
-                    }
-                    newInt[newInt.length - 1] = Integer.valueOf(synsetLineValue[0]);
-                    synsetHashMap.put(synsetAndSynonymSplit[0], newInt);
+                    ArrayList<Integer> synsetHashValue = synsetHashMap.get(synsetAndSynonymSplit[0]);
+                    int placeholder = 0;
+//                    Integer[] newInt = new Integer[synsetHashValue.length + 1];
+//                    for (int i = 0; i < synsetHashValue.length; i++) {
+//                        newInt[i] = synsetHashValue[i];
+//                    }
+
+//                    newInt[newInt.length - 1] = Integer.valueOf(synsetLineValue[0]);
+//                    synsetHashMap.put(synsetAndSynonymSplit[0], newInt);
                 } else {
                     String s = synsetLineValue[0];
                     Integer[] matchingNounIndexArray = new Integer[1];
                     matchingNounIndexArray[0] = Integer.parseInt(s);
-                    synsetHashMap.put(synsetAndSynonymSplit[0], matchingNounIndexArray);
+//                    synsetHashMap.put(synsetAndSynonymSplit[0], matchingNounIndexArray);
                 }
 
                 if (synsetAndSynonymSplit.length > 1) {
@@ -92,13 +94,16 @@ public class WordNet {
 
             // Splits on new line and inserts it to String[] lineString array.
             lineString = hypernymReadLineString.split(System.getProperty("line.separator"));
-
             for (String lineStringStringVar : lineString) {
-                String[] integerLineValues = lineStringStringVar.split(",");
+                String[] integerStringLineValues = lineStringStringVar.split(",");
+                verticesCount++;
                 ArrayList<Integer> hypernymArray = new ArrayList<>();
 
-                for (int i = 0; i < integerLineValues.length; i++) {
-                    hypernymArray.add(i);
+                for (int i = 0; i < integerStringLineValues.length; i++) {
+                    // Take the string extracted from integerStringLineValues, grab the integer and
+                    // input that into the ArrayList holding each synset integers.
+                    hypernymArray.add(Integer.parseInt(integerStringLineValues[i]));
+
                 }
 
                 hypernymIntList.add(hypernymArray);
@@ -108,8 +113,9 @@ public class WordNet {
 
         for (ArrayList<Integer> intList : hypernymIntList) {
             for (int i = 1; i < intList.size(); i++) {
+                int placeholder = 0;
 //              System.out.println("i: " + i + " intList[intList.length - i]: " + intList[intList.length - i] + " intList[intList.length - i - 1]: " + intList[intList.length - i - 1]);
-                digraph.addEdge(intList.get(i), intList.get(i - 1));
+                digraph.addEdge(intList.get(intList.size() - i), intList.get(intList.size() - i - 1));
             }
         }
         this.sap = new SAP(digraph);
@@ -117,9 +123,7 @@ public class WordNet {
 
     // returns all WordNet nouns
     public Iterable<String> nouns() {
-        // Process out all the nouns from the given files. Aren't they already all nouns though? From
-        // the exercise page, "The file synsets.txt lists all the (noun) synsets in WordNet"
-        // Guess it just wants a list of them that's iterable.
+
         return synsetNounWordArrayList;
     }
 
