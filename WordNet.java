@@ -7,12 +7,9 @@
 import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.Stack;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.TreeSet;
 
 
 public class WordNet {
@@ -115,13 +112,7 @@ public class WordNet {
 
     // distance between nounA and nounB (defined below)
     public int distance(String nounA, String nounB) {
-        // distance(A, B) = distance is the minimum length of any ancestral path between any synset v of A and any synset w of B.
-
         return sap.length(synsetHashMap.get(nounA), synsetHashMap.get(nounB));
-    }
-
-    private void manuallyAddMissingVertices() {
-
     }
 
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
