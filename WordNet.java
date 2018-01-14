@@ -26,12 +26,11 @@ public class WordNet {
     private BreadthFirstDirectedPaths breadthFirstDirectedPathsAll;
     private BreadthFirstDirectedPaths breadthFirstDirectedPathsDistance;
     private SAP sap;
+    private int verticesCount;
 
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
-
-        //TODO: Check isNoun is O(log n) and test distance
 
         processSynsets(new In(synsets));
         processHypernyms(new In(hypernyms));
@@ -40,10 +39,12 @@ public class WordNet {
     private void processSynsets(In inSynsets) {
 
         String synsetReadLine;
+        verticesCount = 0;
 
         while (inSynsets.hasNextLine()) {
             synsetReadLine = inSynsets.readLine();
             String[] lineString = synsetReadLine.split(System.getProperty("line.separator"));
+            verticesCount++;
 
             for (String lineSynsetStringVar : lineString) {
                 String[] synsetLineValue = lineSynsetStringVar.split(",");
@@ -52,41 +53,25 @@ public class WordNet {
                 // extracts the synset word and synonyms further.
                 String synsetWordAndSynonyms = synsetLineValue[1];
                 String[] synsetAndSynonymSplit = synsetWordAndSynonyms.split(" ", 2);
-                synsetNounWordArrayList.add(synsetAndSynonymSplit[0]);
+                synsetNounWordArrayList.add(synsetLineValue[1]);
 
-                if (synsetHashMap.containsKey(synsetAndSynonymSplit[0])) { // synsetHashMap ("e", [4]) and is true
-                    // After extracting current id's, collect the id of the value and aggregate existing id's, add the new id into an array.
-
-                    ArrayList<Integer> synsetHashValue = synsetHashMap.get(synsetAndSynonymSplit[0]);
-                    int placeholder = 0;
-//                    Integer[] newInt = new Integer[synsetHashValue.length + 1];
-//                    for (int i = 0; i < synsetHashValue.length; i++) {
-//                        newInt[i] = synsetHashValue[i];
-//                    }
-
-//                    newInt[newInt.length - 1] = Integer.valueOf(synsetLineValue[0]);
-//                    synsetHashMap.put(synsetAndSynonymSplit[0], newInt);
-                } else {
-                    String s = synsetLineValue[0];
-                    Integer[] matchingNounIndexArray = new Integer[1];
-                    matchingNounIndexArray[0] = Integer.parseInt(s);
-//                    synsetHashMap.put(synsetAndSynonymSplit[0], matchingNounIndexArray);
+                for (String noun : synsetAndSynonymSplit) {
+                    if (synsetHashMap.containsKey(noun)) {
+                        ArrayList<Integer> synsetHashValue = synsetHashMap.get(noun);
+                        synsetHashValue.add(Integer.parseInt(synsetLineValue[0]));
+                    }
+                    else {
+                        ArrayList<Integer> newSynsetHashValue = new ArrayList<>(1);
+                        newSynsetHashValue.add(Integer.parseInt(synsetLineValue[0]));
+                        synsetHashMap.put(noun, newSynsetHashValue);
+                    }
                 }
-
-                if (synsetAndSynonymSplit.length > 1) {
-                    synsetSynonyms.add(synsetAndSynonymSplit[1]);
-//                    synsetHashMap.put(synsetLineValue[0], synsetAndSynonymSplit[1]);
-                } else {
-                    synsetSynonyms.add("");
-                }
-                synsetGloss.add(synsetLineValue[2]);
             }
         }
     }
 
     private void processHypernyms(In inHypernyms) {
         String hypernymReadLineString = "";
-        int verticesCount = 0;
 
         while (inHypernyms.hasNextLine()) {
             hypernymReadLineString = inHypernyms.readLine();
@@ -96,7 +81,6 @@ public class WordNet {
             lineString = hypernymReadLineString.split(System.getProperty("line.separator"));
             for (String lineStringStringVar : lineString) {
                 String[] integerStringLineValues = lineStringStringVar.split(",");
-                verticesCount++;
                 ArrayList<Integer> hypernymArray = new ArrayList<>();
 
                 for (int i = 0; i < integerStringLineValues.length; i++) {
@@ -113,8 +97,6 @@ public class WordNet {
 
         for (ArrayList<Integer> intList : hypernymIntList) {
             for (int i = 1; i < intList.size(); i++) {
-                int placeholder = 0;
-//              System.out.println("i: " + i + " intList[intList.length - i]: " + intList[intList.length - i] + " intList[intList.length - i - 1]: " + intList[intList.length - i - 1]);
                 digraph.addEdge(intList.get(intList.size() - i), intList.get(intList.size() - i - 1));
             }
         }
@@ -123,40 +105,63 @@ public class WordNet {
 
     // returns all WordNet nouns
     public Iterable<String> nouns() {
-
         return synsetNounWordArrayList;
     }
 
     // is the word a WordNet noun?
     public boolean isNoun(String word) {
-
         return synsetHashMap.containsKey(word);
     }
 
     // distance between nounA and nounB (defined below)
     public int distance(String nounA, String nounB) {
         // distance(A, B) = distance is the minimum length of any ancestral path between any synset v of A and any synset w of B.
-//        this.breadthFirstDirectedPathsDistance = new BreadthFirstDirectedPaths(digraph, 5);
 
         return sap.length(synsetHashMap.get(nounA), synsetHashMap.get(nounB));
+    }
+
+    private void manuallyAddMissingVertices() {
+
     }
 
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
     // in a shortest ancestral path (defined below)
     public String sap(String nounA, String nounB) {
-        // Return a synset word between nounA and nounB with a common ancestor.
-        return "";
+        int ancestor = sap.ancestor(synsetHashMap.get(nounA), synsetHashMap.get(nounB));
+
+        if (ancestor == -1) {
+            return "No ancestor found?"; //TODO: Check if this is valid.
+        } else {
+            return synsetNounWordArrayList.get(ancestor);
+        }
     }
 
     // do unit testing of this class
     public static void main(String[] args) {
+        WordNet wordNet = new WordNet("wordnettesting/synsets3.txt", "wordnettesting/hypernyms3InvalidCycle.txt");
+
 //        WordNet wordNet = new WordNet("wordnettesting/synsets6.txt", "wordnettesting/hypernyms6TwoAncestors.txt");
-//        WordNet wordNet = new WordNet("wordnettesting/synsetsSubSet.txt","wordnettesting/hypernymSubSet.txt");
-//        WordNet wordNet = new WordNet("wordnettesting/synsets15.txt", "wordnettesting/hypernyms15Path.txt");
-        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms.txt");
-        System.out.println("Is n present? Yes: " + wordNet.isNoun("claw"));
+//        String ancestorString = wordNet.sap("f", "b");
+//        System.out.println("f " + ancestorString);  // How is this b? Shouldn't it be f?
+//        /Users/elsa/Pictures/Monosnap/hypernyms5TwoAncestorsVisual.png  --> Perhaps due to b being a smaller vertex value makes it b.
+
+//        String result = wordNet.sap("b", "c");
+//        System.out.println(result);
+//        Was invalid before but was fixed by adding the counter to match each line in the sysnsetprocessor method. 
+
+//        String[] myArray = {"a", "b", "c"};
+//        for (int i = 0; i < myArray.length; i++ ) {
+//            for (int j = 0; j < myArray.length; j++) {
+//                String ancestorString = wordNet.sap(myArray[i], myArray[j]);
+//                System.out.println("v: " + myArray[i] + " w: " + myArray[j]);
+//                System.out.println(ancestorString);
+//                System.out.println("--------------------");
+//            }
+//        }
+
+//        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms11AmbiguousAncestor.txt");
+        // /Users/elsa/Pictures/Monosnap/hypernyms11AmbiguousAncestorPic.png
+
 
     }
 }
-
-

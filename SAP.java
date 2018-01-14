@@ -16,7 +16,6 @@ public class SAP {
     }
 
     private LengthAndAncestor ancestorLength(Iterable<Integer> v, Iterable<Integer> w) {
-
         BreadthFirstDirectedPaths bfsV = new BreadthFirstDirectedPaths(digraph, v);
         BreadthFirstDirectedPaths bfsW = new BreadthFirstDirectedPaths(digraph, w);
 
@@ -99,14 +98,17 @@ public class SAP {
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
 
-        return ancestor(v, w);
+        return ancestorLength(v, w).ancestorVertex;
+    }
+
+    private void returnTwoIterables() {
+
     }
 
     // do unit testing of this class
     public static void main(String[] args) {
-        In in = new In("wordnettesting/digraph-wordnet.txt");
-        Digraph digraph = new Digraph(in);
-        SAP sap = new SAP(digraph);
-        
+
+
+
     }
 }
