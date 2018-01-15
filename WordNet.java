@@ -129,7 +129,7 @@ public class WordNet {
 
     // do unit testing of this class
     public static void main(String[] args) {
-        WordNet wordNet = new WordNet("wordnettesting/synsets3.txt", "wordnettesting/hypernyms3InvalidCycle.txt");
+        WordNet wordNet = new WordNet("wordnettesting/synsets6.txt", "wordnettesting/hypernyms6InvalidCycle+Path.txt");
 
 //        WordNet wordNet = new WordNet("wordnettesting/synsets6.txt", "wordnettesting/hypernyms6TwoAncestors.txt");
 //        String ancestorString = wordNet.sap("f", "b");
@@ -139,6 +139,19 @@ public class WordNet {
 //        String result = wordNet.sap("b", "c");
 //        System.out.println(result);
 //        Was invalid before but was fixed by adding the counter to match each line in the sysnsetprocessor method. 
+
+//        String ancestorString = wordNet.sap("c", "b");
+//        System.out.println(ancestorString);
+//        passes!
+
+//        String ancestorString = wordNet.sap("e", "b");
+//        String ancestorString = wordNet.sap("e", "b");
+//        System.out.println(ancestorString);
+//        passes!
+
+        String ancestorStr = wordNet.sap("h", "h");
+        System.out.println(ancestorStr);
+//        /Users/elsa/Pictures/Monosnap/hypernyms8ManyAncestors.jpg
 
 //        String[] myArray = {"a", "b", "c"};
 //        for (int i = 0; i < myArray.length; i++ ) {

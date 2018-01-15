@@ -101,10 +101,6 @@ public class SAP {
         return ancestorLength(v, w).ancestorVertex;
     }
 
-    private void returnTwoIterables() {
-
-    }
-
     // do unit testing of this class
     public static void main(String[] args) {
 
