@@ -1,13 +1,21 @@
-import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
-import edu.princeton.cs.algs4.Digraph;
-import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.*;
+import edu.princeton.cs.algs4.Bag;
+
+import java.util.ArrayList;
 
 public class SAP {
-    Digraph digraph;
+    private Digraph digraphCopy;
+    private Digraph digraph;
+    private int[] indegree;
+    private int V;           // number of vertices in this digraph
+    private int E;                 // number of edges in this digraph
+    private Bag<Integer>[] adj;    // adj[v] = adjacency list for vertex v
 
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
-        this.digraph = G;
+
+    this.digraph = G; 
+
     }
 
     // length of shortest ancestral path between v and w; -1 if no such path
@@ -40,8 +48,8 @@ public class SAP {
 
     private class LengthAndAncestor {
 
-        private int ancestorVertex;
-        private int length;
+        private final int ancestorVertex;
+        private final int length;
 
         private LengthAndAncestor(int ancestorVertex, int length) {
             this.ancestorVertex = ancestorVertex;
@@ -101,9 +109,12 @@ public class SAP {
         return ancestorLength(v, w).ancestorVertex;
     }
 
-    // do unit testing of this class
-    public static void main(String[] args) {
 
+    public static void main(String[] args) {
+        // unit testing if need-be for this class
+        Digraph digraph = new Digraph(new In("wordnettesting/digraph9.txt"));
+//        digraph.addEdge(0, 3);
+        SAP sap = new SAP(digraph);
 
 
     }
