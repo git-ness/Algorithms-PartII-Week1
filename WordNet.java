@@ -4,7 +4,6 @@
 // If there is more than one noun, store multiple keys as an array.
 // noun -> key1, key2, key3 (noun, idKey if more than one) --> if there is a <K, V> at all...return true
 
-import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 
@@ -14,14 +13,10 @@ import java.util.HashMap;
 
 public class WordNet {
 
-    private ArrayList<String> synsetNounWordArrayList = new ArrayList<>();
-    private HashMap<String, ArrayList<Integer>> synsetHashMap = new HashMap<>();
-    private ArrayList<String> synsetSynonyms = new ArrayList<>();
-    private ArrayList<String> synsetGloss = new ArrayList<>();
-    private ArrayList<ArrayList<Integer>> hypernymIntList = new ArrayList<>();
+    private final ArrayList<String> synsetNounWordArrayList = new ArrayList<>();
+    private final HashMap<String, ArrayList<Integer>> synsetHashMap = new HashMap<>();
+    private final ArrayList<ArrayList<Integer>> hypernymIntList = new ArrayList<>();
     private Digraph digraph;
-    private BreadthFirstDirectedPaths breadthFirstDirectedPathsAll;
-    private BreadthFirstDirectedPaths breadthFirstDirectedPathsDistance;
     private SAP sap;
     private int verticesCount;
 
@@ -35,31 +30,36 @@ public class WordNet {
 
     private void processSynsets(In inSynsets) {
 
-        String synsetReadLine;
+        String entireLineInFile;
+        String[] convertToStringArray;
+        String[] splitOnCommaToArray;
+        String[] synsetAndSynonymSplit; // Is split on space due to convention of synset.txt.
+        String   synsetWord;
         verticesCount = 0;
 
         while (inSynsets.hasNextLine()) {
-            synsetReadLine = inSynsets.readLine();
-            String[] lineString = synsetReadLine.split(System.getProperty("line.separator"));
+            entireLineInFile = inSynsets.readLine();
+            convertToStringArray = entireLineInFile.split(System.getProperty("line.separator"));
             verticesCount++;
 
-            for (String lineSynsetStringVar : lineString) {
-                String[] synsetLineValue = lineSynsetStringVar.split(",");
+            for (String extractStringFromArray : convertToStringArray) {
+                splitOnCommaToArray = extractStringFromArray.split(",");
 
                 // Synset and synonyms are not delimited by a , but by a space. This further
                 // extracts the synset word and synonyms further.
-                String synsetWordAndSynonyms = synsetLineValue[1];
-                String[] synsetAndSynonymSplit = synsetWordAndSynonyms.split(" ", 2);
-                synsetNounWordArrayList.add(synsetLineValue[1]);
+                String synsetAndSynonymString = splitOnCommaToArray[1];
+                synsetAndSynonymSplit = synsetAndSynonymString.split(" ", 2);
+                synsetWord = synsetAndSynonymSplit[0];
+                synsetNounWordArrayList.add(synsetWord);
 
                 for (String noun : synsetAndSynonymSplit) {
                     if (synsetHashMap.containsKey(noun)) {
                         ArrayList<Integer> synsetHashValue = synsetHashMap.get(noun);
-                        synsetHashValue.add(Integer.parseInt(synsetLineValue[0]));
+                        synsetHashValue.add(Integer.parseInt(splitOnCommaToArray[0]));
                     }
                     else {
                         ArrayList<Integer> newSynsetHashValue = new ArrayList<>(1);
-                        newSynsetHashValue.add(Integer.parseInt(synsetLineValue[0]));
+                        newSynsetHashValue.add(Integer.parseInt(splitOnCommaToArray[0]));
                         synsetHashMap.put(noun, newSynsetHashValue);
                     }
                 }
@@ -129,7 +129,7 @@ public class WordNet {
 
     // do unit testing of this class
     public static void main(String[] args) {
-        WordNet wordNet = new WordNet("wordnettesting/synsets3.txt", "wordnettesting/hypernyms3InvalidCycle.txt");
+//        WordNet wordNet = new WordNet("wordnettesting/synsets11.txt", "wordnettesting/hypernyms11AmbiguousAncestor.txt");
 
 //        WordNet wordNet = new WordNet("wordnettesting/synsets6.txt", "wordnettesting/hypernyms6TwoAncestors.txt");
 //        String ancestorString = wordNet.sap("f", "b");
@@ -140,7 +140,21 @@ public class WordNet {
 //        System.out.println(result);
 //        Was invalid before but was fixed by adding the counter to match each line in the sysnsetprocessor method. 
 
-//        String[] myArray = {"a", "b", "c"};
+//        String ancestorString = wordNet.sap("c", "b");
+//        System.out.println(ancestorString);
+//        passes!
+
+//        String ancestorString = wordNet.sap("e", "b");
+//        String ancestorString = wordNet.sap("e", "b");
+//        System.out.println(ancestorString);
+//        passes!
+
+//        String ancestorStr = wordNet.sap("c", "g");
+//        System.out.println(ancestorStr);
+//        /Users/elsa/Pictures/Monosnap/hypernyms8ManyAncestors.jpg
+//        passes!
+//
+//        String[] myArray = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"};
 //        for (int i = 0; i < myArray.length; i++ ) {
 //            for (int j = 0; j < myArray.length; j++) {
 //                String ancestorString = wordNet.sap(myArray[i], myArray[j]);
