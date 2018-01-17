@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class SAP {
     private Digraph digraphCopy;
-    private Digraph digraph;
+//    private Digraph digraph;
     private int[] indegree;
     private int V;           // number of vertices in this digraph
     private int E;                 // number of edges in this digraph
@@ -14,7 +14,8 @@ public class SAP {
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
 
-    this.digraph = G; 
+
+    this.digraphCopy = G;
 
     }
 
@@ -24,12 +25,12 @@ public class SAP {
     }
 
     private LengthAndAncestor ancestorLength(Iterable<Integer> v, Iterable<Integer> w) {
-        BreadthFirstDirectedPaths bfsV = new BreadthFirstDirectedPaths(digraph, v);
-        BreadthFirstDirectedPaths bfsW = new BreadthFirstDirectedPaths(digraph, w);
+        BreadthFirstDirectedPaths bfsV = new BreadthFirstDirectedPaths(digraphCopy, v);
+        BreadthFirstDirectedPaths bfsW = new BreadthFirstDirectedPaths(digraphCopy, w);
 
         int shortestDistanceCandidate = Integer.MAX_VALUE;
         int bestAncestor = 0;
-        for (int anc = 0; anc < digraph.V(); anc++) {
+        for (int anc = 0; anc < digraphCopy.V(); anc++) {
             if (bfsV.hasPathTo(anc) && bfsW.hasPathTo(anc)) {
 
                 int checkForNewCandidate = bfsV.distTo(anc) + bfsW.distTo(anc);
@@ -68,12 +69,12 @@ public class SAP {
     // a common ancestor of v and w that participates in a shortest ancestral path; -1 if no such path
     private LengthAndAncestor ancestorLength(int v, int w) { // bfs.distTo = length
 
-        BreadthFirstDirectedPaths bfsV = new BreadthFirstDirectedPaths(digraph, v);
-        BreadthFirstDirectedPaths bfsW = new BreadthFirstDirectedPaths(digraph, w);
+        BreadthFirstDirectedPaths bfsV = new BreadthFirstDirectedPaths(digraphCopy, v);
+        BreadthFirstDirectedPaths bfsW = new BreadthFirstDirectedPaths(digraphCopy, w);
 
         int shortestDistanceCandidate = Integer.MAX_VALUE;
         int bestAncestor = 0;
-        for (int anc = 0; anc < digraph.V(); anc++) {
+        for (int anc = 0; anc < digraphCopy.V(); anc++) {
             if (bfsV.hasPathTo(anc) && bfsW.hasPathTo(anc)) {
 
                 int checkForNewCandidate = bfsV.distTo(anc) + bfsW.distTo(anc);
@@ -81,14 +82,16 @@ public class SAP {
                     shortestDistanceCandidate = checkForNewCandidate;
                     bestAncestor = anc;
                 }
+            } // Does the bestAncestor match the shortestDistanceCanidate? The princeton    test seems to indicate it. (
+            // Test 1 of Testing Correctness.
+
+            if (shortestDistanceCandidate == Integer.MAX_VALUE) {
+                return new LengthAndAncestor(-1, -1);
             }
         }
-        if (shortestDistanceCandidate == Integer.MAX_VALUE) {
-            return new LengthAndAncestor(-1, -1);
-        }
-
         return new LengthAndAncestor(bestAncestor, shortestDistanceCandidate);
     }
+
 
     public int ancestor(int v, int w) {
         return ancestorLength(v, w).getAncestorVertex();
@@ -100,7 +103,7 @@ public class SAP {
 
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
-        return 0;
+        return ancestorLength(v, w).length;
     }
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
@@ -112,10 +115,14 @@ public class SAP {
 
     public static void main(String[] args) {
         // unit testing if need-be for this class
-        Digraph digraph = new Digraph(new In("wordnettesting/digraph9.txt"));
+        Digraph digraph = new Digraph(new In("wordnettesting/digraph1.txt"));
 //        digraph.addEdge(0, 3);
         SAP sap = new SAP(digraph);
+        int ancester = sap.ancestor(3, 3);
+        System.out.println("ancestor should be 3: " + ancester);
 
+        int length = sap.length(3, 3);
+        System.out.println("length should be 0: " + length);
 
     }
 }
