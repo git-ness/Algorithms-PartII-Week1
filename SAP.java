@@ -1,11 +1,11 @@
-import edu.princeton.cs.algs4.*;
+import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Bag;
+import edu.princeton.cs.algs4.In;
 
-import java.util.ArrayList;
 
-public class SAP {
-    private Digraph digraphCopy;
-//    private Digraph digraph;
+public final class SAP {
+    private final Digraph digraphCopy;
     private int[] indegree;
     private int V;           // number of vertices in this digraph
     private int E;                 // number of edges in this digraph
@@ -13,7 +13,6 @@ public class SAP {
 
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
-
 
     this.digraphCopy = G;
 
@@ -85,9 +84,10 @@ public class SAP {
             } // Does the bestAncestor match the shortestDistanceCanidate? The princeton    test seems to indicate it. (
             // Test 1 of Testing Correctness.
 
-            if (shortestDistanceCandidate == Integer.MAX_VALUE) {
-                return new LengthAndAncestor(-1, -1);
+
             }
+        if (shortestDistanceCandidate == Integer.MAX_VALUE) {
+            return new LengthAndAncestor(-1, -1);
         }
         return new LengthAndAncestor(bestAncestor, shortestDistanceCandidate);
     }
@@ -112,17 +112,16 @@ public class SAP {
         return ancestorLength(v, w).ancestorVertex;
     }
 
-
     public static void main(String[] args) {
         // unit testing if need-be for this class
-        Digraph digraph = new Digraph(new In("wordnettesting/digraph1.txt"));
+        Digraph digraph = new Digraph(new In("wordnettesting/digraph2.txt"));
 //        digraph.addEdge(0, 3);
-        SAP sap = new SAP(digraph);
-        int ancester = sap.ancestor(3, 3);
-        System.out.println("ancestor should be 3: " + ancester);
+        SAP sap = new SAP(digraph   );
+//        int ancester = sap.ancestor(2, 1);
+//        System.out.println("ancestor should be 4: " + ancester);
 
-        int length = sap.length(3, 3);
-        System.out.println("length should be 0: " + length);
+        int length = sap.length(0, 2);
+        System.out.println("Length is " + length);
 
     }
 }

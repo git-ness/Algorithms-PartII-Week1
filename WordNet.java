@@ -129,7 +129,7 @@ public class WordNet {
 
     // do unit testing of this class
     public static void main(String[] args) {
-        WordNet wordNet = new WordNet("wordnettesting/synsets11.txt", "wordnettesting/hypernyms11AmbiguousAncestor.txt");
+        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms.txt");
 
 //        WordNet wordNet = new WordNet("wordnettesting/synsets6.txt", "wordnettesting/hypernyms6TwoAncestors.txt");
 //        String ancestorString = wordNet.sap("f", "b");
@@ -153,19 +153,20 @@ public class WordNet {
 //        /Users/elsa/Pictures/Monosnap/hypernyms8ManyAncestors.jpg
 //        passes!
 //
-        String[] myArray = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"};
-        for (int i = 0; i < myArray.length; i++ ) {
-            for (int j = 0; j < myArray.length; j++) {
+//        String[] myArray = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"};
+//        for (int i = 0; i < myArray.length; i++ ) {
+//            for (int j = 0; j < myArray.length; j++) {
 //                String ancestorString = wordNet.sap(myArray[i], myArray[j]);
 //                System.out.println("v: " + myArray[i] + " w: " + myArray[j]);
 //                System.out.println(ancestorString);
 //                System.out.println("--------------------");
-            }
-        }
+//            }
+//        }
 
 //        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms11AmbiguousAncestor.txt");
         // /Users/elsa/Pictures/Monosnap/hypernyms11AmbiguousAncestorPic.png
 
-
+        int distance = wordNet.distance("chisel_steel", "Al_Aqabah" );
+        System.out.println(distance);
     }
 }
