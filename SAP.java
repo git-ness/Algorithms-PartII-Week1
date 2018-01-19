@@ -14,7 +14,7 @@ public final class SAP {
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
 
-    this.digraphCopy = G;
+        digraphCopy = new Digraph(G);
 
     }
 
@@ -114,14 +114,16 @@ public final class SAP {
 
     public static void main(String[] args) {
         // unit testing if need-be for this class
-        Digraph digraph = new Digraph(new In("wordnettesting/digraph2.txt"));
+//        Digraph digraph = new Digraph(new In("wordnettesting/synsets.txt"));
 //        digraph.addEdge(0, 3);
-        SAP sap = new SAP(digraph   );
-//        int ancester = sap.ancestor(2, 1);
+//        SAP sap = new SAP(digraph   );
+//        int ancester = sap.ancestor(-1, 0);
 //        System.out.println("ancestor should be 4: " + ancester);
+//
+//        int length = sap.length(-1, 0);
+//        System.out.println("Length is " + length);
 
-        int length = sap.length(0, 2);
-        System.out.println("Length is " + length);
+
 
     }
 }

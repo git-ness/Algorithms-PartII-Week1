@@ -1,3 +1,7 @@
+//TODO: Think about how Wordnet and length from SAP are related.
+    //TODO: THey are related via the call to SAP from the distance method
+//TODO: Smaller subsets i.e. onesynset etc can't reproduce this issue.
+
 // Implementing that stores both the id and the set of synonyms. What data structure what would that be.
 
 // Use all nouns as a key and have the value be the integer.
@@ -19,13 +23,33 @@ public class WordNet {
     private Digraph digraph;
     private SAP sap;
     private int verticesCount;
-
+    private int root;
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
 
         processSynsets(new In(synsets));
         processHypernyms(new In(hypernyms));
+        System.out.println("------- 0 =? " + digraph.outdegree(38003));
+
+        //TODO: Set a conditional for when the root is ^ and see what lengths it is creating. Does it have outdegree 0?
+
+        for (int anc = 0; anc < digraph.V(); anc++) {
+
+            if (digraph.outdegree(anc) == 0) {
+//                System.out.println("I found the root, it is: " + anc);
+            }
+        }
+    }
+
+    private int root() {
+        for (int anc = 0; anc < digraph.V(); anc++) {
+            int value = anc;
+            if (digraph.outdegree(anc) == 0) {
+                return anc;
+            }
+        }
+        return 0;
     }
 
     private void processSynsets(In inSynsets) {
@@ -34,7 +58,7 @@ public class WordNet {
         String[] convertToStringArray;
         String[] splitOnCommaToArray;
         String[] synsetAndSynonymSplit; // Is split on space due to convention of synset.txt.
-        String   synsetWord;
+        String synsetWord;
         verticesCount = 0;
 
         while (inSynsets.hasNextLine()) {
@@ -56,8 +80,7 @@ public class WordNet {
                     if (synsetHashMap.containsKey(noun)) {
                         ArrayList<Integer> synsetHashValue = synsetHashMap.get(noun);
                         synsetHashValue.add(Integer.parseInt(splitOnCommaToArray[0]));
-                    }
-                    else {
+                    } else {
                         ArrayList<Integer> newSynsetHashValue = new ArrayList<>(1);
                         newSynsetHashValue.add(Integer.parseInt(splitOnCommaToArray[0]));
                         synsetHashMap.put(noun, newSynsetHashValue);
@@ -121,7 +144,7 @@ public class WordNet {
         int ancestor = sap.ancestor(synsetHashMap.get(nounA), synsetHashMap.get(nounB));
 
         if (ancestor == -1) {
-            return "No ancestor found?"; //TODO: Check if this is valid.
+            throw new IllegalArgumentException();
         } else {
             return synsetNounWordArrayList.get(ancestor);
         }
@@ -129,44 +152,18 @@ public class WordNet {
 
     // do unit testing of this class
     public static void main(String[] args) {
+
+//        WordNet wordNet = new WordNet("wordnettesting/synsets15.txt", "wordnettesting/hypernyms15Tree.txt");
         WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms.txt");
 
-//        WordNet wordNet = new WordNet("wordnettesting/synsets6.txt", "wordnettesting/hypernyms6TwoAncestors.txt");
-//        String ancestorString = wordNet.sap("f", "b");
-//        System.out.println("f " + ancestorString);  // How is this b? Shouldn't it be f?
-//        /Users/elsa/Pictures/Monosnap/hypernyms5TwoAncestorsVisual.png  --> Perhaps due to b being a smaller vertex value makes it b.
 
-//        String result = wordNet.sap("b", "c");
-//        System.out.println(result);
-//        Was invalid before but was fixed by adding the counter to match each line in the sysnsetprocessor method. 
+        int root = wordNet.root();
+        System.out.println("Proposed root is: " + root);
 
-//        String ancestorString = wordNet.sap("c", "b");
-//        System.out.println(ancestorString);
-//        passes!
-
-//        String ancestorString = wordNet.sap("e", "b");
-//        System.out.println(ancestorString);
-//        passes!
-
-//        String ancestorStr = wordNet.sap("c", "g");
-//        System.out.println(ancestorStr);
-//        /Users/elsa/Pictures/Monosnap/hypernyms8ManyAncestors.jpg
-//        passes!
-//
-//        String[] myArray = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"};
-//        for (int i = 0; i < myArray.length; i++ ) {
-//            for (int j = 0; j < myArray.length; j++) {
-//                String ancestorString = wordNet.sap(myArray[i], myArray[j]);
-//                System.out.println("v: " + myArray[i] + " w: " + myArray[j]);
-//                System.out.println(ancestorString);
-//                System.out.println("--------------------");
-//            }
-//        }
-
-//        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms11AmbiguousAncestor.txt");
-        // /Users/elsa/Pictures/Monosnap/hypernyms11AmbiguousAncestorPic.png
-
-        int distance = wordNet.distance("chisel_steel", "Al_Aqabah" );
-        System.out.println(distance);
     }
+
+
 }
+
+// Write code to check to see if a dag is rooted or not.
+// Count the number of nodes pointing out. If it's 0, it's a root.
