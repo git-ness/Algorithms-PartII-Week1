@@ -1,6 +1,3 @@
-//TODO: Think about how Wordnet and length from SAP are related.
-    //TODO: THey are related via the call to SAP from the distance method
-//TODO: Smaller subsets i.e. onesynset etc can't reproduce this issue.
 
 // Implementing that stores both the id and the set of synonyms. What data structure what would that be.
 
@@ -33,6 +30,9 @@ public class WordNet {
         System.out.println("------- 0 =? " + digraph.outdegree(38003));
 
         //TODO: Set a conditional for when the root is ^ and see what lengths it is creating. Does it have outdegree 0?
+        //TODO: Ask length from where to where? WordNet only has a distance method that calls from nounA, nounB
+        //TODO: Are my assumptions about the graph correct according to the specs?
+        //TODO: I calculated the number of nodes pointing out and it's not 0 according to the bag. (See screenshot)
 
         for (int anc = 0; anc < digraph.V(); anc++) {
 
@@ -159,7 +159,27 @@ public class WordNet {
 
         int root = wordNet.root();
         System.out.println("Proposed root is: " + root);
+        testMethod(wordNet);
 
+
+    }
+
+    private static void testMethod(WordNet wordNet) {
+        // Path between animate_being and animal.. what is the length?
+
+
+        try {
+            int bird = wordNet.distance("worm","bird");
+            int animal = wordNet.distance("animate_being", "animal");
+
+            System.out.println("distance for word: " + bird);
+            System.out.println("distance for animal: " + animal);
+        } catch (Exception E) {
+            int bird = wordNet.distance("worm","bird");
+            int animal = wordNet.distance("animate_being", "animal");
+
+            System.out.println(E);
+        }
     }
 
 
