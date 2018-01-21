@@ -9,13 +9,13 @@ import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-
 
 public class WordNet {
 
     private final ArrayList<String> synsetNounWordArrayList = new ArrayList<>();
-    private final HashMap<String, ArrayList<Integer>> synsetHashMap = new HashMap<>();
+    private final HashMap<ArrayList<String>, ArrayList<Integer>> synsetHashMap = new HashMap<>();
     private final ArrayList<ArrayList<Integer>> hypernymIntList = new ArrayList<>();
     private Digraph digraph;
     private SAP sap;
@@ -49,7 +49,7 @@ public class WordNet {
                 return anc;
             }
         }
-        return 0;
+        return -1;
     }
 
     private void processSynsets(In inSynsets) {
@@ -65,6 +65,7 @@ public class WordNet {
             entireLineInFile = inSynsets.readLine();
             convertToStringArray = entireLineInFile.split(System.getProperty("line.separator"));
             verticesCount++;
+            ArrayList<String> wordsInSynset;
 
             for (String extractStringFromArray : convertToStringArray) {
                 splitOnCommaToArray = extractStringFromArray.split(",");
@@ -73,22 +74,31 @@ public class WordNet {
                 // extracts the synset word and synonyms further.
                 String synsetAndSynonymString = splitOnCommaToArray[1];
                 synsetAndSynonymSplit = synsetAndSynonymString.split(" ", 2);
+
+                // Parses out the String[] from the synsetAndSynonymSplit and imports them into an ArrayList<String>
+
+                String[] split = synsetAndSynonymString.split(" ", 3);
+                wordsInSynset = new ArrayList<>(Arrays.asList(split));
+
                 synsetWord = synsetAndSynonymSplit[0];
                 synsetNounWordArrayList.add(synsetWord);
 
-                for (String noun : synsetAndSynonymSplit) {
+                for (String noun : wordsInSynset) {
                     if (synsetHashMap.containsKey(noun)) {
-                        ArrayList<Integer> synsetHashValue = synsetHashMap.get(noun);
-                        synsetHashValue.add(Integer.parseInt(splitOnCommaToArray[0]));
+                        ArrayList<Integer> synsetNounIds = synsetHashMap.get(noun);
+                        synsetNounIds.add(Integer.parseInt(splitOnCommaToArray[0]));
+                        synsetHashMap.put(wordsInSynset, synsetNounIds);
                     } else {
-                        ArrayList<Integer> newSynsetHashValue = new ArrayList<>(1);
-                        newSynsetHashValue.add(Integer.parseInt(splitOnCommaToArray[0]));
-                        synsetHashMap.put(noun, newSynsetHashValue);
+                        ArrayList<Integer> newSynsetNounIds = new ArrayList<>(1);
+                        newSynsetNounIds.add(Integer.parseInt(splitOnCommaToArray[0]));
+                        synsetHashMap.put(wordsInSynset, newSynsetNounIds);
                     }
                 }
             }
         }
     }
+
+
 
     private void processHypernyms(In inHypernyms) {
         String hypernymReadLineString = "";
@@ -107,7 +117,6 @@ public class WordNet {
                     // Take the string extracted from integerStringLineValues, grab the integer and
                     // input that into the ArrayList holding each synset integers.
                     hypernymArray.add(Integer.parseInt(integerStringLineValues[i]));
-
                 }
 
                 hypernymIntList.add(hypernymArray);
@@ -130,7 +139,7 @@ public class WordNet {
 
     // is the word a WordNet noun?
     public boolean isNoun(String word) {
-        return synsetHashMap.containsKey(word);
+            return synsetHashMap.containsKey(word);
     }
 
     // distance between nounA and nounB (defined below)
@@ -153,13 +162,16 @@ public class WordNet {
     // do unit testing of this class
     public static void main(String[] args) {
 
-//        WordNet wordNet = new WordNet("wordnettesting/synsets15.txt", "wordnettesting/hypernyms15Tree.txt");
-        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms.txt");
+        WordNet wordNet = new WordNet("wordnettesting/processingBug.txt", "wordnettesting/processingBugHypernyms.txt");
 
+//        int root = wordNet.root();
+//        System.out.println("Proposed root is: " + root);
+//        testMethod(wordNet);
 
-        int root = wordNet.root();
-        System.out.println("Proposed root is: " + root);
-        testMethod(wordNet);
+        System.out.println(wordNet.isNoun("one"));
+
+        int one = wordNet.distance("one", "zero");
+        int nilch = wordNet.distance("nilch", "zero");
 
 
     }
@@ -167,22 +179,24 @@ public class WordNet {
     private static void testMethod(WordNet wordNet) {
         // Path between animate_being and animal.. what is the length?
 
+//        try {
+//            int bird = wordNet.distance("worm","bird");
+//            int animal = wordNet.distance("animate_being", "animal");
+//
+//            System.out.println("distance for word: " + bird);
+//            System.out.println("distance for animal: " + animal);
+//        } catch (Exception E) {
+//            int bird = wordNet.distance("worm","bird");
+//            int animal = wordNet.distance("animate_being", "animal");
+//
+//            System.out.println(E);
+//
+//        }
+//    }
 
-        try {
-            int bird = wordNet.distance("worm","bird");
-            int animal = wordNet.distance("animate_being", "animal");
+//}
 
-            System.out.println("distance for word: " + bird);
-            System.out.println("distance for animal: " + animal);
-        } catch (Exception E) {
-            int bird = wordNet.distance("worm","bird");
-            int animal = wordNet.distance("animate_being", "animal");
-
-            System.out.println(E);
-        }
     }
-
-
 }
 
 // Write code to check to see if a dag is rooted or not.

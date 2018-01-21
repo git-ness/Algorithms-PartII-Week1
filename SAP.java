@@ -13,9 +13,7 @@ public final class SAP {
 
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
-
         digraphCopy = new Digraph(G);
-
     }
 
     // length of shortest ancestral path between v and w; -1 if no such path
