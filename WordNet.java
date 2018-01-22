@@ -19,7 +19,7 @@ public class WordNet {
     private final HashMap<ArrayList<String>, ArrayList<Integer>> synsetHashMap = new HashMap<>();
     private final ArrayList<ArrayList<Integer>> hypernymIntList = new ArrayList<>();
     HashMap<String, HashSet<Integer>> nounToSynsetIdMap = new HashMap<>();
-    HashMap<Integer,ArrayList<String>> synsetIdToNounsMap = new HashMap<>();
+    HashMap<Integer, HashSet<String>> synsetIdToNounsMap = new HashMap<>();
     private Digraph digraph;
     private SAP sap;
     private int verticesCount;
@@ -83,23 +83,31 @@ public class WordNet {
 //                synsetNounWordArrayList.add(synsetWord);
 
                 for (String noun : wordsInSynset) {
-                    HashSet<Integer> synsetIds = new HashSet<>();
-                    synsetIdToNounsMap = new HashMap<>();
+//                    HashSet<Integer> synsetIds = new HashSet<>();
+//                    synsetIdToNounsMap = new HashMap<>();
 
+                    HashSet<String> synsetNouns = synsetIdToNounsMap.get(synsetId);
 
-                    ArrayList<String> synsetIdsList = new ArrayList<>(1);
-                    if (!synsetIdsList.contains(synsetId)) {
-                        synsetIdsList.add(noun);
+                    /*
+                    if (synsetNouns == null) {
+                        HashSet<String> synsetNounInsert = new HashSet<>();
+                        synsetNounInsert.add(noun);
+                        synsetIdToNounsMap.put(synsetId, synsetNouns);
+                    }
+                    */
+
+                    if (synsetNouns.contains(synsetId)) {
+                        synsetNouns.add(noun);
                     }
 
-                    synsetIdToNounsMap.put(synsetId, synsetIdsList);
-                    synsetIds.add(synsetId);
+
+
 
                     // Creates a one to many map of synsetNoun to multiple synsetIds if the noun is in more than one synset.
-                    nounToSynsetIdMap.put(noun, synsetIds);
+//                    synsetIds.add(synsetId);
+//                    nounToSynsetIdMap.put(noun, synsetIds);
 
                 }
-
 //                    noun : moreThanOneNounIds -> use ids to parse each id where needed
 //                    noun : ArrayList of synsetIds the noun belogs to.
 //                    noun : synsetIds -> isnoun(word) -> isNoun(noun) -> pass noun as iterable where needed  (cannot have a dup key, will not work)
@@ -107,10 +115,12 @@ public class WordNet {
 //                    can have more than one nounId
 //                    can have more than one noun in the synset
 
-                }
             }
-            int placeHolder = 0;
         }
+        int placeHolder = 0;
+    }
+
+
 
     private void processHypernyms(In inHypernyms) {
         String hypernymReadLineString = "";
