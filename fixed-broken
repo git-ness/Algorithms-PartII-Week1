@@ -206,47 +206,40 @@ public class WordNet {
     // do unit testing of this class
     public static void main(String[] args) {
 
-        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms.txt");
+        WordNet wordNet = new WordNet("wordnettesting/processingBug.txt", "wordnettesting/processingBugHypernyms.txt");
 
 //        int root = wordNet.root();
 //        System.out.println("Proposed root is: " + root);
 //        testMethod(wordNet);
 
-
-        int isItFive = wordNet.distance("worm", "bird");
-        System.out.println("distance is five?  " + isItFive);
-
-        int verticeCount = wordNet.verticesCount;
-        System.out.println("verticeCount: " + verticeCount);
-
-
-
-//        testMethod(wordNet);
+        String isItZero = wordNet.sap("three", "one");
+        System.out.println("zero? " + isItZero);
 
     }
 
     private static void testMethod(WordNet wordNet) {
         // Path between animate_being and animal.. what is the length?
 
-        try {
-            int bird = wordNet.distance("worm","bird");
-            int animal = wordNet.distance("animate_being", "animal");
-
-            System.out.println("distance for word: " + bird);
-            System.out.println("distance for animal: " + animal);
-        } catch (Exception E) {
-            int bird = wordNet.distance("worm","bird");
-            int animal = wordNet.distance("animate_being", "animal");
-
-            System.out.println(E);
-
-        }
-    }
+//        try {
+//            int bird = wordNet.distance("worm","bird");
+//            int animal = wordNet.distance("animate_being", "animal");
+//
+//            System.out.println("distance for word: " + bird);
+//            System.out.println("distance for animal: " + animal);
+//        } catch (Exception E) {
+//            int bird = wordNet.distance("worm","bird");
+//            int animal = wordNet.distance("animate_being", "animal");
+//
+//            System.out.println(E);
+//
+//        }
+//    }
 
 //}
 
     }
-
+}
 
 // Write code to check to see if a dag is rooted or not.
 // Count the number of nodes pointing out. If it's 0, it's a root.
+
