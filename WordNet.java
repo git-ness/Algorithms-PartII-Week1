@@ -41,7 +41,6 @@ public class WordNet {
 
     private int root() {
         for (int anc = 0; anc < digraph.V(); anc++) {
-            int value = anc;
             if (digraph.outdegree(anc) == 0) {
                 return anc;
             }
@@ -109,6 +108,8 @@ public class WordNet {
                 }
             }
         }
+
+        int placeholder = 0;
     }
 
     private void processHypernyms(In inHypernyms) {
@@ -206,18 +207,15 @@ public class WordNet {
     // do unit testing of this class
     public static void main(String[] args) {
 
-        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms.txt");
+        WordNet wordNet = new WordNet("wordnettesting/processingBug.txt", "wordnettesting/processingBugHypernyms.txt");
 
-//        int root = wordNet.root();
-//        System.out.println("Proposed root is: " + root);
-//        testMethod(wordNet);
+        int root = wordNet.root();
+        System.out.println("Proposed root is: " + root);
+        testMethod(wordNet);
 
 
         int isItFive = wordNet.distance("worm", "bird");
         System.out.println("distance is five?  " + isItFive);
-
-        int verticeCount = wordNet.verticesCount;
-        System.out.println("verticeCount: " + verticeCount);
 
 
 
