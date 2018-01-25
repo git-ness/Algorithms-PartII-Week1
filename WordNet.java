@@ -41,7 +41,9 @@ public class WordNet {
 
     private int root() {
         for (int anc = 0; anc < digraph.V(); anc++) {
+            System.out.println("anc " + digraph.outdegree(anc) );
             if (digraph.outdegree(anc) == 0) {
+
                 return anc;
             }
         }
@@ -95,15 +97,13 @@ public class WordNet {
                  */
 
                 HashSet<String> nounsWithinSynset = new HashSet<>();
+                synsetIdToNounsMap.put(synsetId, nounsWithinSynset);
 
                 for (String noun : wordsInSynset) {
 
-                    synsetIdToNounsMap.computeIfAbsent(synsetId, k -> new HashSet<>());
-                    HashSet<String> nounsFromSynset = synsetIdToNounsMap.get(synsetId);
-                    nounsFromSynset.add(noun);
+                    nounsWithinSynset.add(noun);
 
-                    nounToSynsetIdMap.computeIfAbsent(noun, k -> new HashSet<>());
-                    HashSet<Integer> synsetIds = nounToSynsetIdMap.get(noun);
+                    HashSet<Integer> synsetIds = nounToSynsetIdMap.computeIfAbsent(noun, k -> new HashSet<>());
                     synsetIds.add(synsetId);
                 }
             }
@@ -138,11 +138,28 @@ public class WordNet {
 
         for (ArrayList<Integer> intList : hypernymIntList) {
             for (int i = 1; i < intList.size(); i++) {
-                digraph.addEdge(intList.get(intList.size() - i), intList.get(intList.size() - i - 1));
+
+                int v = intList.get(0) ;
+                int w = intList.get(i);
+
+                if (v ==  38003 || w == 38003) {
+                    System.out.println(v + " -> " + w);
+                }
+                digraph.addEdge(v, w);
             }
         }
         this.sap = new SAP(digraph);
+        System.out.println("38003 out: " + digraph.outdegree(38003));
     }
+
+    /*
+
+    for (int i = 1; i < index.length; i++)
+    {
+	    createEdge(index[i], index[0])
+    }
+     */
+
 
     // returns all WordNet nouns
     public Iterable<String> nouns() {
@@ -168,12 +185,8 @@ public class WordNet {
             throw new IllegalArgumentException();
         } else {
             HashSet<String> nounsSet = synsetIdToNounsMap.get(ancestor); // zero, nilch, nada
-            for (String nounCanidate : nounsSet) {
+            return nounsSet.iterator().next();
 
-                if (nounsSet.contains(nounCanidate)) {
-                    return nounCanidate;
-                }
-            }
         }
             /*---------- Memory Map ---------------
                     Goal to accomplish next (What's this things job?):
@@ -201,21 +214,22 @@ public class WordNet {
                           sap("one", "three") = zero
             */
         // If nothing matches, throw new IllegalArg
-        throw new IllegalArgumentException();
     }
 
     // do unit testing of this class
     public static void main(String[] args) {
 
-        WordNet wordNet = new WordNet("wordnettesting/processingBug.txt", "wordnettesting/processingBugHypernyms.txt");
+//        WordNet wordNet = new WordNet("wordnettesting/processingBug.txt", "wordnettesting/processingBugHypernyms.txt");
+        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms.txt");
 
         int root = wordNet.root();
         System.out.println("Proposed root is: " + root);
-        testMethod(wordNet);
+//        testMethod(wordNet);
 
 
-        int isItFive = wordNet.distance("worm", "bird");
-        System.out.println("distance is five?  " + isItFive);
+        int isOne= wordNet.distance("administrative_district", "municipality");
+//        String isZero = wordNet.sap("one", "three");
+        System.out.println("distance is isOne?  " + isOne);
 
 
 
@@ -223,23 +237,23 @@ public class WordNet {
 
     }
 
-    private static void testMethod(WordNet wordNet) {
-        // Path between animate_being and animal.. what is the length?
-
-        try {
-            int bird = wordNet.distance("worm","bird");
-            int animal = wordNet.distance("animate_being", "animal");
-
-            System.out.println("distance for word: " + bird);
-            System.out.println("distance for animal: " + animal);
-        } catch (Exception E) {
-            int bird = wordNet.distance("worm","bird");
-            int animal = wordNet.distance("animate_being", "animal");
-
-            System.out.println(E);
-
-        }
-    }
+//    private static void testMethod(WordNet wordNet) {
+//        // Path between animate_being and animal.. what is the length?
+//
+//        try {
+//            int bird = wordNet.distance("worm","bird");
+//            int animal = wordNet.distance("animate_being", "animal");
+//
+//            System.out.println("distance for word: " + bird);
+//            System.out.println("distance for animal: " + animal);
+//        } catch (Exception E) {
+//            int bird = wordNet.distance("worm","bird");
+//            int animal = wordNet.distance("animate_being", "animal");
+//
+//            System.out.println(E);
+//
+//        }
+//    }
 
 //}
 
