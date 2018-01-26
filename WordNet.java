@@ -1,12 +1,7 @@
 
-// Implementing that stores both the id and the set of synonyms. What data structure what would that be.
-
-// Use all nouns as a key and have the value be the integer.
-// If there is more than one noun, store multiple keys as an array.
-// noun -> key1, key2, key3 (noun, idKey if more than one) --> if there is a <K, V> at all...return true
-
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Topological;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,13 +11,12 @@ import java.util.HashSet;
 public class WordNet {
 
     private final ArrayList<ArrayList<Integer>> hypernymIntList = new ArrayList<>();
-    HashMap<String, HashSet<Integer>> nounToSynsetIdMap = new HashMap<>();
-    HashMap<Integer, HashSet<String>> synsetIdToNounsMap = new HashMap<>();
+    private HashMap<String, HashSet<Integer>> nounToSynsetIdMap = new HashMap<>();
+    private HashMap<Integer, HashSet<String>> synsetIdToNounsMap = new HashMap<>();
     private Digraph digraph;
     private SAP sap;
     private int verticesCount;
     private int root;
-
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
@@ -30,18 +24,26 @@ public class WordNet {
         In synsetsInput = new In(synsets);
         processSynsets(synsetsInput);
         processHypernyms(new In(hypernyms));
+        int rootCounter = 0;
 
         for (int anc = 0; anc < digraph.V(); anc++) {
 
             if (digraph.outdegree(anc) == 0) {
 //                System.out.println("I found the root, it is: " + anc);
+                rootCounter++;
             }
         }
+        if (rootCounter != 1) {
+            throw new IllegalArgumentException("");
+        }
+
+        if (!(new Topological(digraph).hasOrder()));
+        { throw new IllegalArgumentException(); }
     }
 
     private int root() {
         for (int anc = 0; anc < digraph.V(); anc++) {
-            System.out.println("anc " + digraph.outdegree(anc) );
+//            System.out.println("anc " + digraph.outdegree(anc));
             if (digraph.outdegree(anc) == 0) {
 
                 return anc;
@@ -79,23 +81,6 @@ public class WordNet {
                 // Parses out the String[] from the synsetAndSynonymSplit and imports them into an ArrayList<String>
                 wordsInSynset = new ArrayList<>(Arrays.asList(stringsBetweenSpaces));
 
-                /*
-                    Goal to accomplish next (What's this things job?):
-                        [x] Add synset words to nounToSynsetIdMap.  "zero",1
-                        [x] Add synsetId to which words are on the "line" in the csv file.    1, {one, uno, appearsTwice)
-
-                    Process - pseudo code (What we'll need):
-                        [x] HashSet<Integer> nounIdSet = nounToSynsetIdMap.get(noun);
-                        [x] nounIdSet.add(synsetId);
-
-                        HashSet<Integer> nounsInSynset = synsetIdToNounMap.get(noun);
-                        nounsInSynset.add(noun);
-
-                    Test Result Validation:
-                        [x] nounToSynsetIdMap.get("appearsTwice") returns 1,3
-                        [x] nounIdSet.get("one") returns 1,2
-                 */
-
                 HashSet<String> nounsWithinSynset = new HashSet<>();
                 synsetIdToNounsMap.put(synsetId, nounsWithinSynset);
 
@@ -108,8 +93,6 @@ public class WordNet {
                 }
             }
         }
-
-        int placeholder = 0;
     }
 
     private void processHypernyms(In inHypernyms) {
@@ -139,35 +122,28 @@ public class WordNet {
         for (ArrayList<Integer> intList : hypernymIntList) {
             for (int i = 1; i < intList.size(); i++) {
 
-                int v = intList.get(0) ;
+                int v = intList.get(0);
                 int w = intList.get(i);
 
-                if (v ==  38003 || w == 38003) {
-                    System.out.println(v + " -> " + w);
+                // Debug
+                if (v == 70904 || w == 70904  || v == 4497 || w == 4497) {
+//                    System.out.println(v + " -> " + w);
                 }
                 digraph.addEdge(v, w);
             }
         }
         this.sap = new SAP(digraph);
-        System.out.println("38003 out: " + digraph.outdegree(38003));
+//        System.out.println("38003 out: " + digraph.outdegree(38003));
     }
-
-    /*
-
-    for (int i = 1; i < index.length; i++)
-    {
-	    createEdge(index[i], index[0])
-    }
-     */
-
 
     // returns all WordNet nouns
     public Iterable<String> nouns() {
-        return (Iterable<String>) nounToSynsetIdMap;
+        return nounToSynsetIdMap.keySet();
     }
 
     // is the word a WordNet noun?
     public boolean isNoun(String word) {
+        if (word == null) throw new IllegalArgumentException();
         return nounToSynsetIdMap.containsKey(word);
     }
 
@@ -184,36 +160,14 @@ public class WordNet {
         if (ancestor == -1) {
             throw new IllegalArgumentException();
         } else {
-            HashSet<String> nounsSet = synsetIdToNounsMap.get(ancestor); // zero, nilch, nada
-            return nounsSet.iterator().next();
+            HashSet<String> nounsSet = synsetIdToNounsMap.get(ancestor);
 
+            String nounAggregate = "";
+            for ( String stringVar : nounsSet ) {
+                nounAggregate += stringVar + " ";
+            }
+            return nounAggregate;
         }
-            /*---------- Memory Map ---------------
-                    Goal to accomplish next (What's this things job?):
-                          Find the common ancestor from the integer. The integer is the id of the synset that maps to a noun.
-
-                    Process - pseudo code (What we'll need):
-                          nounToSynsetIdMap
-                          synsetIdToNounsMap
-
-                          Iterate through the nounToSynsetIdMap, and synsetIdToNounsMap.
-                          Locate the common noun in both.
-
-                          1 and 4 share 0 which is the word "zero"
-
-                          for(Integer synsetInteger : nounToSynsetIdMap) {
-                            for (String noun : synsetIdToNounsMap) {
-                                if ( noun.equals(synsetInteger) ) {
-                                  return noun;
-                                }
-                             }
-                          }
-
-
-                    Test Result Validation:
-                          sap("one", "three") = zero
-            */
-        // If nothing matches, throw new IllegalArg
     }
 
     // do unit testing of this class
@@ -221,19 +175,19 @@ public class WordNet {
 
 //        WordNet wordNet = new WordNet("wordnettesting/processingBug.txt", "wordnettesting/processingBugHypernyms.txt");
         WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms.txt");
+        String synsetReturn = wordNet.sap("deoxyribose","scale_wax");
+        System.out.println("sap return is: " + synsetReturn);
+
+
 
         int root = wordNet.root();
         System.out.println("Proposed root is: " + root);
 //        testMethod(wordNet);
 
 
-        int isOne= wordNet.distance("administrative_district", "municipality");
+//        int isOne= wordNet.distance("word", "bird");
 //        String isZero = wordNet.sap("one", "three");
-        System.out.println("distance is isOne?  " + isOne);
-
-
-
-//        testMethod(wordNet);
+//        System.out.println("distance is isOne?  " + isOne);
 
     }
 
@@ -257,7 +211,7 @@ public class WordNet {
 
 //}
 
-    }
+}
 
 
 // Write code to check to see if a dag is rooted or not.
