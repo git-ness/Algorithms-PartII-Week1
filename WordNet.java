@@ -37,8 +37,12 @@ public class WordNet {
             throw new IllegalArgumentException("");
         }
 
-        if (!(new Topological(digraph).hasOrder()));
-        { throw new IllegalArgumentException(); }
+        Topological topological = new Topological(digraph);
+//        Topological(digraph).hasOrder())
+        if (!(topological.hasOrder())) ;
+        {
+//            throw new IllegalArgumentException();
+        }
     }
 
     private int root() {
@@ -126,7 +130,7 @@ public class WordNet {
                 int w = intList.get(i);
 
                 // Debug
-                if (v == 70904 || w == 70904  || v == 4497 || w == 4497) {
+                if (v == 70904 || w == 70904 || v == 4497 || w == 4497) {
 //                    System.out.println(v + " -> " + w);
                 }
                 digraph.addEdge(v, w);
@@ -163,7 +167,7 @@ public class WordNet {
             HashSet<String> nounsSet = synsetIdToNounsMap.get(ancestor);
 
             String nounAggregate = "";
-            for ( String stringVar : nounsSet ) {
+            for (String stringVar : nounsSet) {
                 nounAggregate += stringVar + " ";
             }
             return nounAggregate;
@@ -175,9 +179,8 @@ public class WordNet {
 
 //        WordNet wordNet = new WordNet("wordnettesting/processingBug.txt", "wordnettesting/processingBugHypernyms.txt");
         WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms.txt");
-        String synsetReturn = wordNet.sap("deoxyribose","scale_wax");
+        String synsetReturn = wordNet.sap("deoxyribose", "scale_wax");
         System.out.println("sap return is: " + synsetReturn);
-
 
 
         int root = wordNet.root();
