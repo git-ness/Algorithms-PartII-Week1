@@ -9,8 +9,6 @@ public class Outcast {
     public Outcast(WordNet wordnet) {       // constructor takes a WordNet object
         this.wordNet1 = wordnet;
 
-
-
        /*---------- Memory Map ---------------
                     Goal to accomplish next (What's this things job?):
 
@@ -90,30 +88,23 @@ public class Outcast {
 
     public String outcast(String[] nouns) {  // given an array of WordNet nouns, return an outcast
 
-        int distanceOfWordi = 0;
+        String outcastCandidateString = "";
         int highestDistance = 0;
-        int distanceOfWordiPlusOne = 0;
-        String outcastStringCandidate = "";
 
         for (int i = 0; i < nouns.length; i++) {
+            int secondDistance = 0;
             for (int j = 0; j < nouns.length; j++) {
 
+                secondDistance += wordNet1.distance(nouns[i], nouns[j]);
 
-                distanceOfWordi = wordNet1.distance(nouns[i], nouns[j]);
-                distanceOfWordiPlusOne = wordNet1.distance(nouns[i + 1], nouns[j]);
-
-                if (distanceOfWordi > distanceOfWordiPlusOne) {
-                    highestDistance = distanceOfWordiPlusOne;
-                    outcastStringCandidate = nouns[i+1];
-
+                if (highestDistance < secondDistance) {
+                    outcastCandidateString = nouns[i];
+                    highestDistance = secondDistance;
                 }
-
             }
-        outcastStringCandidate = nouns[i];
         }
 
-
-        return outcastStringCandidate;
+        return outcastCandidateString;
     }
 
 
