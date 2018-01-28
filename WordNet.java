@@ -39,9 +39,9 @@ public class WordNet {
 
         Topological topological = new Topological(digraph);
 //        Topological(digraph).hasOrder())
-        if (!(topological.hasOrder())) ;
+        if (!(topological.hasOrder()))
         {
-//            throw new IllegalArgumentException();
+            throw new IllegalArgumentException();
         }
     }
 
@@ -100,7 +100,7 @@ public class WordNet {
     }
 
     private void processHypernyms(In inHypernyms) {
-        String hypernymReadLineString = "";
+        String hypernymReadLineString;
 
         while (inHypernyms.hasNextLine()) {
             hypernymReadLineString = inHypernyms.readLine();
@@ -130,9 +130,9 @@ public class WordNet {
                 int w = intList.get(i);
 
                 // Debug
-                if (v == 70904 || w == 70904 || v == 4497 || w == 4497) {
+//                if (v == 70904 || w == 70904 || v == 4497 || w == 4497) {
 //                    System.out.println(v + " -> " + w);
-                }
+//                }
                 digraph.addEdge(v, w);
             }
         }
@@ -179,12 +179,15 @@ public class WordNet {
 
 //        WordNet wordNet = new WordNet("wordnettesting/processingBug.txt", "wordnettesting/processingBugHypernyms.txt");
         WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms.txt");
-        String synsetReturn = wordNet.sap("deoxyribose", "scale_wax");
-        System.out.println("sap return is: " + synsetReturn);
 
 
-        int root = wordNet.root();
-        System.out.println("Proposed root is: " + root);
+//        WordNet wordNet = new WordNet("wordnettesting/synsets.txt", "wordnettesting/hypernyms.txt");
+//        String synsetReturn = wordNet.sap("deoxyribose", "scale_wax");
+//        System.out.println("sap return is: " + synsetReturn);
+
+
+//        int root = wordNet.root();
+//        System.out.println("Proposed root is: " + root);
 //        testMethod(wordNet);
 
 
